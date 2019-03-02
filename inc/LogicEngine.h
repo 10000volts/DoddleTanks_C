@@ -33,8 +33,11 @@ void AddLogicStep(LogicStep* ls);
 void RemoveLogicStep(LogicStep* ls);
 void ClearLogicSteps();
 
-LogicSprite* CreateLogicSprite(void* me, void(*update)(void*, int), int x, int y, int w, int h);
+LogicSprite* CreateLogicSprite(void* me, void(*update)(void*, int), int x, int y, int w, int h, IMAGE* im, IMAGE* msk = NULL);
 LogicStep* CreateLogicStep(char stepname[], void(*update)(LogicStep* _this));
+
+// 程序是否应该继续运行。
+extern BOOLean g_running_;
 
 // 全部逻辑精灵的集合，本身为其中首元素的地址。仿照vector的机制进行内存管理。
 extern LogicSprite* m_logicSpriteManager_;
@@ -42,7 +45,7 @@ extern int logicSpriteCount_;
 // 逻辑精灵集合的容量。
 extern int logicSpriteReserve_;
 // 全部逻辑步骤的集合，本身为其中首元素的地址。仿照vector的机制进行内存管理。
-extern LogicStep* m_logicStepManager_;
+extern LogicStep** m_logicStepManager_;
 extern int logicStepCount_;
 // 逻辑步骤集合的容量。
 extern int logicStepReserve_;

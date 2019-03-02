@@ -18,7 +18,8 @@ void AddButton(Button* b);
 void RemoveButton(Button* b);
 void ClearButtons();
 
-Button* CreateButton(LogicSprite* ls, void(*oc)(Button*), void(*of)(Button*), void(*ol)(Button*), RenderButton* body);
+Button* CreateButton(LogicSprite* ls, void(*oc)(Button*), void(*of)(Button*), void(*ol)(Button*), 
+	IMAGE* defimage, IMAGE* defmask = NULL, IMAGE* fcsimage = NULL, IMAGE* fcsmask = NULL);
 
 // 目前拥有焦点的按钮。
 extern Button* m_focusButton_;
@@ -30,3 +31,12 @@ extern int buttonReserve_;
 
 // LogicStep资源。
 extern LogicStep* m_stepCheckFocus_;
+
+inline void ButtonFocusDefault(Button* tis) {
+	tis->ls_->m_body_->m_image_ = tis->m_body_->m_fcs_image_;
+	tis->ls_->m_body_->m_mask_ = tis->m_body_->m_fcs_mask_;
+}
+inline void ButtonLeaveDefault(Button* tis) {
+	tis->ls_->m_body_->m_image_ = tis->m_body_->m_def_image_;
+	tis->ls_->m_body_->m_mask_ = tis->m_body_->m_def_mask_;
+}

@@ -17,9 +17,12 @@
 #define V6_TRANSPARENT_COLOR	0x0000FF
 
 //  ‰»Î–≈œ¢°£
+#define V6_MOUSE_LEFT			VK_LBUTTON
 #define V6_KEY_LEFT				65
 #define V6_KEY_RIGHT			68
 #define V6_KEY_UP				87
 #define V6_KEY_DOWN				83
+#define V6_KEY_SHOOT			V6_MOUSE_LEFT
+#define V6_KEY_SET_WALL			88
 #define V6_KEY_PAUSE			80
 #define V6_KEY_ESC				27
