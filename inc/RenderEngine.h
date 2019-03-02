@@ -2,8 +2,9 @@
 
 #include <easyx.h>
 typedef struct _RenderSprite {
+	// 原本的图片。不能作任何修改。
 	IMAGE* m_image_;
-	// 掩码图片。
+	// 原本的掩码图片。不能作任何修改。
 	IMAGE* m_mask_;
 } RenderSprite;
 

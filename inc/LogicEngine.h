@@ -8,7 +8,7 @@
 typedef struct _LogicSprite {
 	// 返回此逻辑精灵的真正实体。
 	void* m_me_;
-	void (*Update)(void* _this, int t);
+	void (*Update)(struct _LogicSprite* _this);
 	// 横坐标，纵坐标。
 	int m_x_, m_y_, m_w_, m_h_;
 	double m_angle_;
@@ -33,7 +33,7 @@ void AddLogicStep(LogicStep* ls);
 void RemoveLogicStep(LogicStep* ls);
 void ClearLogicSteps();
 
-LogicSprite* CreateLogicSprite(void* me, void(*update)(void*, int), int x, int y, int w, int h, IMAGE* im, IMAGE* msk = NULL);
+LogicSprite* CreateLogicSprite(void* me, void(*update)(LogicSprite*), int x, int y, int w, int h, IMAGE* im, IMAGE* msk = NULL);
 LogicStep* CreateLogicStep(char stepname[], void(*update)(LogicStep* _this));
 
 // 程序是否应该继续运行。

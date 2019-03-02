@@ -20,14 +20,18 @@ RenderButton * CreateRenderButton(IMAGE * defimage, IMAGE * defmask, IMAGE * fcs
 
 void RenderUpdate()
 {
+	int i;
+	IMAGE t;
+
 	BeginBatchDraw();
 	cleardevice();
-	int i;
 	for (i = 0; i < logicSpriteCount_; ++i) {
 		LogicSprite e = m_logicSpriteManager_[i];
 		if (e.m_body_->m_mask_ != NULL) {
-			putimage(e.m_x_, e.m_y_, e.m_body_->m_mask_, SRCAND);
-			putimage(e.m_x_, e.m_y_, e.m_body_->m_image_, SRCPAINT);
+			rotateimage(&t, e.m_body_->m_mask_, e.m_angle_, BLACK, TRUE);
+			putimage(e.m_x_, e.m_y_, &t, NOTSRCERASE);
+			rotateimage(&t, e.m_body_->m_image_, e.m_angle_, WHITE, TRUE);
+			putimage(e.m_x_, e.m_y_, &t, SRCINVERT);
 		}
 		else {
 			putimage(e.m_x_, e.m_y_, e.m_body_->m_image_);

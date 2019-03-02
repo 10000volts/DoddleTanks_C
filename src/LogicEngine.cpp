@@ -11,6 +11,9 @@ void LogicUpdate()
 	for (i = 0; i < logicStepCount_; ++i) {
 		m_logicStepManager_[i]->Update(m_logicStepManager_[i]);
 	}
+	for (i = 0; i < logicSpriteCount_; ++i) {
+		if(m_logicSpriteManager_[i].Update != NULL) m_logicSpriteManager_[i].Update(&m_logicSpriteManager_[i]);
+	}
 }
 
 // ÒÆ³ýËùÓÐÂß¼­²½ÖèºÍÂß¼­¾«Áé¡£
@@ -47,7 +50,9 @@ void RemoveLogicSprite(LogicSprite * ls)
 	int i;
 	for (i = 0; i < logicSpriteCount_; ++i) {
 		if (m_logicSpriteManager_ + i == ls) {
-			if (i != logicSpriteCount_ - 1) memcpy(m_logicSpriteManager_ + i, m_logicSpriteManager_ + i + 1, logicSpriteCount_ - i - 1);
+			if (i != logicSpriteCount_ - 1) {
+				memcpy(m_logicSpriteManager_ + i, m_logicSpriteManager_ + i + 1, logicSpriteCount_ - i - 1);
+			}
 			--logicSpriteCount_;
 		}
 	}
@@ -80,7 +85,7 @@ void ClearLogicSteps()
 	m_logicStepManager_ = NULL;
 }
 
-LogicSprite * CreateLogicSprite(void * me, void(*update)(void *, int), int x, int y, int w, int h, IMAGE* im, IMAGE* msk)
+LogicSprite * CreateLogicSprite(void * me, void(*update)(LogicSprite *), int x, int y, int w, int h, IMAGE* im, IMAGE* msk)
 {
 	LogicSprite* r = (LogicSprite*)malloc(sizeof(LogicSprite));
 	memset(r, 0, sizeof(LogicSprite));

@@ -12,6 +12,8 @@ void ButtonClickLoadGame(Button* tis);
 void ButtonClickLoadHelp(Button* tis);
 void ButtonClickLoadRankingList(Button* tis);
 
+void Test(LogicSprite* tis);
+
 // 清除当前场景上的所有内容并重新加载场景。
 void LoadScene(enum Scene sc) {
 	ClearButtons();
@@ -64,6 +66,9 @@ void LoadMainScene()
 	AddLogicSprite(ls);
 	b = CreateButton(ls, ButtonClickExit, ButtonFocusDefault, ButtonLeaveDefault, &g_img_exit, NULL, &g_img_exitFocus);
 	AddButton(b);
+
+	ls = CreateLogicSprite(NULL, Test, 50, 400, 200, 100, &g_img_bossTank, &g_img_bossTankMsk);
+	AddLogicSprite(ls);
 }
 
 void LoadHelpScene()
@@ -110,4 +115,9 @@ void ButtonClickLoadGame(Button* tis) {
 
 void ButtonClickLoadRankingList(Button* tis) {
 	LoadScene(SCENE_RANKING);
+}
+
+void Test(LogicSprite* tis) {
+	tis->m_angle_ += 0.01;
+	if (tis->m_angle_ >= 3.1415926 * 2.0) tis->m_angle_ -= 3.1415926 * 2.0;
 }
