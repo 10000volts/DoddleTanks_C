@@ -6,10 +6,10 @@ void StepCheckFocus(LogicStep*);
 
 void LoadLogicControlStepResource()
 {
-	m_stepCheckFocus_ = (LogicStep*)malloc(sizeof(LogicStep));
-	memset(m_stepCheckFocus_, 0, sizeof(LogicStep));
-	strcpy(m_stepCheckFocus_->m_stepName_, "CheckFocus");
-	m_stepCheckFocus_->Update = StepCheckFocus;
+	g_stepCheckFocus_ = (LogicStep*)malloc(sizeof(LogicStep));
+	memset(g_stepCheckFocus_, 0, sizeof(LogicStep));
+	strcpy(g_stepCheckFocus_->m_stepName_, "CheckFocus");
+	g_stepCheckFocus_->Update = StepCheckFocus;
 }
 
 void AddButton(Button * b)
@@ -17,9 +17,9 @@ void AddButton(Button * b)
 	if (buttonCount_ >= buttonReserve_) {
 		buttonReserve_ *= 2;
 		++buttonReserve_;
-		m_buttonManager_ = (Button*)ExtendAndCopy(m_buttonManager_, buttonCount_, sizeof(Button), buttonReserve_);
+		g_buttonManager_ = (Button*)ExtendAndCopy(g_buttonManager_, buttonCount_, sizeof(Button), buttonReserve_);
 	}
-	m_buttonManager_[buttonCount_] = *b;
+	g_buttonManager_[buttonCount_] = *b;
 	++buttonCount_;
 }
 
@@ -27,8 +27,8 @@ void RemoveButton(Button * ls)
 {
 	int i;
 	for (i = 0; i < buttonCount_; ++i) {
-		if (m_buttonManager_ + i == ls) {
-			if(i != buttonCount_ - 1) memcpy(m_buttonManager_ + i, m_buttonManager_ + i + 1, buttonCount_ - i - 1);
+		if (g_buttonManager_ + i == ls) {
+			if(i != buttonCount_ - 1) memcpy(g_buttonManager_ + i, g_buttonManager_ + i + 1, buttonCount_ - i - 1);
 			--buttonCount_;
 		}
 	}
@@ -36,11 +36,11 @@ void RemoveButton(Button * ls)
 
 void ClearButtons()
 {
-	m_focusButton_ = NULL;
-	free(m_buttonManager_);
+	g_focusButton_ = NULL;
+	free(g_buttonManager_);
 	buttonCount_ = 0;
 	buttonReserve_ = 0;
-	m_buttonManager_ = NULL;
+	g_buttonManager_ = NULL;
 }
 
 Button * CreateButton(LogicSprite * ls, void(*oc)(Button*), void(*of)(Button*), void(*ol)(Button*),
@@ -56,8 +56,8 @@ Button * CreateButton(LogicSprite * ls, void(*oc)(Button*), void(*of)(Button*), 
 	return r;
 }
 
-Button* m_focusButton_ = NULL;
-Button* m_buttonManager_ = NULL;
+Button* g_focusButton_ = NULL;
+Button* g_buttonManager_ = NULL;
 int buttonCount_ = 0;
 // °´Å¥µÄÈÝÁ¿¡£
 int buttonReserve_ = 0;
@@ -68,24 +68,24 @@ void StepCheckFocus(LogicStep* tis) {
 	LONG mx = g_mouseState_.x, my = g_mouseState_.y;
 	LogicSprite* ls;
 	for (i = 0; i < buttonCount_; ++i) {
-		ls = m_buttonManager_[i].ls_;
+		ls = g_buttonManager_[i].ls_;
 		if (IsIn(mx, my, ls->m_x_, ls->m_y_, ls->m_w_, ls->m_h_)) {
-			if (m_focusButton_ != NULL) {
-				if (m_focusButton_ == &m_buttonManager_[i]) goto onclick;
-				if (m_focusButton_->OnLeave != NULL) m_focusButton_->OnLeave(m_focusButton_);
+			if (g_focusButton_ != NULL) {
+				if (g_focusButton_ == &g_buttonManager_[i]) goto onclick;
+				if (g_focusButton_->OnLeave != NULL) g_focusButton_->OnLeave(g_focusButton_);
 			}
-			m_focusButton_ = &m_buttonManager_[i];
-			if(m_focusButton_->OnFocus != NULL) m_focusButton_->OnFocus(m_focusButton_);
+			g_focusButton_ = &g_buttonManager_[i];
+			if(g_focusButton_->OnFocus != NULL) g_focusButton_->OnFocus(g_focusButton_);
 		onclick:
-			m_focusButton_ = &m_buttonManager_[i];
-			if (g_mouseState_.left_down) {
-				m_focusButton_->OnClick(m_focusButton_);
+			g_focusButton_ = &g_buttonManager_[i];
+			if (g_mouseState_.left_up) {
+				g_focusButton_->OnClick(g_focusButton_);
 			}
 			return;
 		}
 	}
-	if (m_focusButton_ != NULL) {
-		if (m_focusButton_->OnLeave != NULL) m_focusButton_->OnLeave(m_focusButton_);
+	if (g_focusButton_ != NULL) {
+		if (g_focusButton_->OnLeave != NULL) g_focusButton_->OnLeave(g_focusButton_);
 	}
-	m_focusButton_ = NULL;
+	g_focusButton_ = NULL;
 }

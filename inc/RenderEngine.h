@@ -1,11 +1,16 @@
 #pragma once
 
 #include <easyx.h>
+
+struct _LogicSprite;
+typedef _LogicSprite LogicSprite;
+
 typedef struct _RenderSprite {
 	// 原本的图片。不能作任何修改。
 	IMAGE* m_image_;
 	// 原本的掩码图片。不能作任何修改。
 	IMAGE* m_mask_;
+	void (*Render)(LogicSprite* e);
 } RenderSprite;
 
 typedef struct _RenderButton {
@@ -19,7 +24,14 @@ typedef struct _RenderButton {
 	IMAGE* m_fcs_mask_;
 } RenderButton;
 
-RenderSprite* CreateRenderSprite(IMAGE* image, IMAGE* mask);
+RenderSprite* CreateRenderSprite(IMAGE* image, IMAGE* mask, void(*render)(LogicSprite* e));
 RenderButton* CreateRenderButton(IMAGE* defimage, IMAGE* defmask, IMAGE* fcsimage, IMAGE* fcsmask);
 
 void RenderUpdate();
+
+// 只绘制原图像，覆盖原有像素。
+void RenderSimple(LogicSprite* ls);
+// 带有透明、旋转的渲染。
+void RenderWithRotation(LogicSprite* ls);
+// 带有透明、朝向的渲染。(不具有旋转)
+void RenderWithDirection(LogicSprite* ls);

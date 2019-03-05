@@ -1,10 +1,11 @@
 #include "LogicControl.h"
 
-RenderSprite * CreateRenderSprite(IMAGE * image, IMAGE * mask)
+RenderSprite * CreateRenderSprite(IMAGE * image, IMAGE * mask, void(*render)(LogicSprite* e))
 {
 	RenderSprite* r = (RenderSprite*)malloc(sizeof(RenderSprite));
 	r->m_image_ = image;
 	r->m_mask_ = mask;
+	r->Render = render;
 	return r;
 }
 
@@ -18,24 +19,32 @@ RenderButton * CreateRenderButton(IMAGE * defimage, IMAGE * defmask, IMAGE * fcs
 	return r;
 }
 
+static IMAGE t;
 void RenderUpdate()
 {
 	int i;
-	IMAGE t;
 
 	BeginBatchDraw();
 	cleardevice();
 	for (i = 0; i < logicSpriteCount_; ++i) {
-		LogicSprite e = m_logicSpriteManager_[i];
-		if (e.m_body_->m_mask_ != NULL) {
-			rotateimage(&t, e.m_body_->m_mask_, e.m_angle_, BLACK, TRUE);
-			putimage(e.m_x_, e.m_y_, &t, NOTSRCERASE);
-			rotateimage(&t, e.m_body_->m_image_, e.m_angle_, WHITE, TRUE);
-			putimage(e.m_x_, e.m_y_, &t, SRCINVERT);
-		}
-		else {
-			putimage(e.m_x_, e.m_y_, e.m_body_->m_image_);
-		}
+		g_logicSpriteManager_[i].m_body_->Render(&g_logicSpriteManager_[i]);
 	}
 	EndBatchDraw();
+}
+
+
+void RenderSimple(LogicSprite* ls) {
+	putimage(ls->m_x_, ls->m_y_, ls->m_body_->m_image_);
+}
+
+void RenderWithRotation(LogicSprite* ls) {
+	rotateimage(&t, ls->m_body_->m_mask_, ls->m_angle_, BLACK);
+	putimage(ls->m_x_, ls->m_y_, &t, NOTSRCERASE);
+	rotateimage(&t, ls->m_body_->m_image_, ls->m_angle_, WHITE);
+	putimage(ls->m_x_, ls->m_y_, &t, SRCINVERT);
+}
+
+void RenderWithDirection(LogicSprite* ls) {
+	putimage(ls->m_x_, ls->m_y_, &t, NOTSRCERASE);
+	putimage(ls->m_x_, ls->m_y_, &t, SRCINVERT);
 }

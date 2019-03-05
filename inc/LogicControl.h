@@ -22,15 +22,15 @@ Button* CreateButton(LogicSprite* ls, void(*oc)(Button*), void(*of)(Button*), vo
 	IMAGE* defimage, IMAGE* defmask = NULL, IMAGE* fcsimage = NULL, IMAGE* fcsmask = NULL);
 
 // 目前拥有焦点的按钮。
-extern Button* m_focusButton_;
+extern Button* g_focusButton_;
 // 全部按钮的集合，本身为其中首元素的地址。仿照vector的机制进行内存管理。
-extern Button* m_buttonManager_;
+extern Button* g_buttonManager_;
 extern int buttonCount_;
 // 按钮的容量。
 extern int buttonReserve_;
 
 // LogicStep资源。
-extern LogicStep* m_stepCheckFocus_;
+extern LogicStep* g_stepCheckFocus_;
 
 inline void ButtonFocusDefault(Button* tis) {
 	tis->ls_->m_body_->m_image_ = tis->m_body_->m_fcs_image_;

@@ -6,13 +6,11 @@
 void LogicUpdate()
 {
 	int i;
-
-	UpdateStates();
 	for (i = 0; i < logicStepCount_; ++i) {
-		m_logicStepManager_[i]->Update(m_logicStepManager_[i]);
+		g_logicStepManager_[i]->Update(g_logicStepManager_[i]);
 	}
 	for (i = 0; i < logicSpriteCount_; ++i) {
-		if(m_logicSpriteManager_[i].Update != NULL) m_logicSpriteManager_[i].Update(&m_logicSpriteManager_[i]);
+		if(g_logicSpriteManager_[i].Update != NULL) g_logicSpriteManager_[i].Update(&g_logicSpriteManager_[i]);
 	}
 }
 
@@ -28,9 +26,9 @@ void AddLogicSprite(LogicSprite * ls)
 	if (logicSpriteCount_ >= logicSpriteReserve_) {
 		logicSpriteReserve_ *= 2;
 		++logicSpriteReserve_;
-		m_logicSpriteManager_ = (LogicSprite*)ExtendAndCopy(m_logicSpriteManager_, logicSpriteCount_, sizeof(LogicSprite), logicSpriteReserve_);
+		g_logicSpriteManager_ = (LogicSprite*)ExtendAndCopy(g_logicSpriteManager_, logicSpriteCount_, sizeof(LogicSprite), logicSpriteReserve_);
 	}
-	m_logicSpriteManager_[logicSpriteCount_] = *ls;
+	g_logicSpriteManager_[logicSpriteCount_] = *ls;
 	++logicSpriteCount_;
 }
 
@@ -39,9 +37,9 @@ void AddLogicStep(LogicStep * ls)
 	if (logicStepCount_ >= logicStepReserve_) {
 		logicStepReserve_ *= 2;
 		++logicStepReserve_;
-		m_logicStepManager_ = (LogicStep**)ExtendAndCopy(m_logicStepManager_, logicStepCount_, sizeof(LogicStep*), logicStepReserve_);
+		g_logicStepManager_ = (LogicStep**)ExtendAndCopy(g_logicStepManager_, logicStepCount_, sizeof(LogicStep*), logicStepReserve_);
 	}
-	m_logicStepManager_[logicStepCount_] = ls;
+	g_logicStepManager_[logicStepCount_] = ls;
 	++logicStepCount_;
 }
 
@@ -49,9 +47,9 @@ void RemoveLogicSprite(LogicSprite * ls)
 {
 	int i;
 	for (i = 0; i < logicSpriteCount_; ++i) {
-		if (m_logicSpriteManager_ + i == ls) {
+		if (g_logicSpriteManager_ + i == ls) {
 			if (i != logicSpriteCount_ - 1) {
-				memcpy(m_logicSpriteManager_ + i, m_logicSpriteManager_ + i + 1, logicSpriteCount_ - i - 1);
+				memcpy(g_logicSpriteManager_ + i, g_logicSpriteManager_ + i + 1, logicSpriteCount_ - i - 1);
 			}
 			--logicSpriteCount_;
 		}
@@ -62,8 +60,8 @@ void RemoveLogicStep(LogicStep * ls)
 {
 	int i;
 	for (i = 0; i < logicStepCount_; ++i) {
-		if (*(m_logicStepManager_ + i) == ls) {
-			if(i != logicStepCount_ - 1) memcpy(m_logicStepManager_ + i, m_logicStepManager_ + i + 1, logicStepCount_ - i - 1);
+		if (*(g_logicStepManager_ + i) == ls) {
+			if(i != logicStepCount_ - 1) memcpy(g_logicStepManager_ + i, g_logicStepManager_ + i + 1, logicStepCount_ - i - 1);
 			--logicStepCount_;
 		}
 	}
@@ -71,21 +69,21 @@ void RemoveLogicStep(LogicStep * ls)
 
 void ClearLogicSprites()
 {
-	free(m_logicSpriteManager_);
+	free(g_logicSpriteManager_);
 	logicSpriteCount_ = 0;
 	logicSpriteReserve_ = 0;
-	m_logicSpriteManager_ = NULL;
+	g_logicSpriteManager_ = NULL;
 }
 
 void ClearLogicSteps()
 {
-	free(m_logicStepManager_);
+	free(g_logicStepManager_);
 	logicStepCount_ = 0;
 	logicStepReserve_ = 0;
-	m_logicStepManager_ = NULL;
+	g_logicStepManager_ = NULL;
 }
 
-LogicSprite * CreateLogicSprite(void * me, void(*update)(LogicSprite *), int x, int y, int w, int h, IMAGE* im, IMAGE* msk)
+LogicSprite * CreateLogicSprite(void * me, void(*update)(LogicSprite *), int x, int y, int w, int h, void(*render)(LogicSprite* ls), IMAGE* im, IMAGE* msk)
 {
 	LogicSprite* r = (LogicSprite*)malloc(sizeof(LogicSprite));
 	memset(r, 0, sizeof(LogicSprite));
@@ -95,7 +93,7 @@ LogicSprite * CreateLogicSprite(void * me, void(*update)(LogicSprite *), int x, 
 	r->m_y_ = y;
 	r->m_w_ = w;
 	r->m_h_ = h;
-	r->m_body_ = CreateRenderSprite(im, msk);
+	r->m_body_ = CreateRenderSprite(im, msk, render);
 	return r;
 }
 
@@ -110,11 +108,11 @@ LogicStep* CreateLogicStep(char stepname[], void(*update)(LogicStep* _this))
 
 BOOLean g_running_ = true;
 
-LogicSprite* m_logicSpriteManager_ = NULL;
-LogicStep** m_logicStepManager_ = NULL;
+LogicSprite* g_logicSpriteManager_ = NULL;
+LogicStep** g_logicStepManager_ = NULL;
 int logicSpriteCount_ = 0;
 int logicSpriteReserve_ = 0;
 int logicStepCount_ = 0;
 int logicStepReserve_ = 0;
 
-LogicStep* m_stepCheckFocus_ = NULL;
+LogicStep* g_stepCheckFocus_ = NULL;

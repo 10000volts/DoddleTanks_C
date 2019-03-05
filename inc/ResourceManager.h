@@ -5,16 +5,20 @@
 // 开辟新的内存空间以加载公共资源。这些资源不应该在运行中被释放。
 void LoadResources();
 
-extern IMAGE g_img_bigTank;
+typedef enum _DIRECTION {
+	DRT_RIGHT, DRT_UP, DRT_LEFT, DRT_DOWN
+} DIRECTION;
+
+extern IMAGE g_img_bigTank[4];
 extern IMAGE g_img_bigTankBattery;
 extern IMAGE g_img_bossTank;
 extern IMAGE g_img_castle;
 extern IMAGE g_img_exit;
-extern IMAGE g_img_fiveTank;
-extern IMAGE g_img_vegetableTank;
-extern IMAGE g_img_prismTank;
-extern IMAGE g_img_junkTank;
-extern IMAGE g_img_lanlingkingTank;
+extern IMAGE g_img_fiveTank[4];
+extern IMAGE g_img_vegetableTank[4];
+extern IMAGE g_img_prismTank[4];
+extern IMAGE g_img_junkTank[4];
+extern IMAGE g_img_lanlingkingTank[4];
 extern IMAGE g_img_mainTitle;
 extern IMAGE g_img_start;
 extern IMAGE g_img_wallWorn0;
@@ -37,19 +41,29 @@ extern IMAGE g_img_helpDetail;
 extern IMAGE g_img_back;
 extern IMAGE g_img_backFocus;
 extern IMAGE g_img_bigTankBatteryMsk;
-extern IMAGE g_img_bigTankMsk;
+extern IMAGE g_img_bigTankMsk[4];
 extern IMAGE g_img_bossTankMsk;
 extern IMAGE g_img_castleMsk;
 extern IMAGE g_img_emptyHpMsk;
-extern IMAGE g_img_fiveTankMsk;
+extern IMAGE g_img_fiveTankMsk[4];
 extern IMAGE g_img_heartMsk;
 extern IMAGE g_img_hpMsk;
-extern IMAGE g_img_junkTankMsk;
-extern IMAGE g_img_lanlingkingTankMsk;
-extern IMAGE g_img_vegetableTankMsk;
+extern IMAGE g_img_junkTankMsk[4];
+extern IMAGE g_img_lanlingkingTankMsk[4];
+extern IMAGE g_img_vegetableTankMsk[4];
 extern IMAGE g_img_bigBulletMsk;
-extern IMAGE g_img_prismTankMsk;
+extern IMAGE g_img_prismTankMsk[4];
 extern IMAGE g_img_smallBulletMsk;
 extern IMAGE g_img_bigBullet;
 extern IMAGE g_img_smallBullet;
 extern IMAGE g_img_mainTitle2;
+extern IMAGE g_img_save;
+extern IMAGE g_img_saveFocus;
+extern IMAGE g_img_loadGame;
+extern IMAGE g_img_loadGameFocus;
+extern IMAGE g_img_easy;
+extern IMAGE g_img_easyFocus;
+extern IMAGE g_img_veasy;
+extern IMAGE g_img_veasyFocus;
+extern IMAGE g_img_eeasy;
+extern IMAGE g_img_eeasyFocus;
