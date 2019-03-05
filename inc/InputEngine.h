@@ -5,9 +5,10 @@
 
 typedef struct _KEYBOARDSTATE {
 	// 左是否被按下？上……？
-	BOOLean left_down, up_down, right_down, down_down, shoot_down, set_wall_down, pause_down, esc_down;
+	BOOLean left_down, up_down, right_down, down_down, shoot_down, set_wall_down, pause_down, esc_down, slow_down,
+		num1_down, num2_down, num3_down;
 	// 左是否弹起？……
-	BOOLean left_up, right_up;
+	BOOLean left_up, right_up, num1_up, num2_up, num3_up;
 } KeyBoardState;
 
 typedef struct _MOUSESTATE {
@@ -15,6 +16,9 @@ typedef struct _MOUSESTATE {
 	BOOLean left_down;
 	BOOLean left_up;
 } MouseState;
+
+// 初始化输入环境。需要窗口句柄。
+void InitializeInputEnv();
 
 // 更新用户的输入状态。
 void InputUpdate();

@@ -130,7 +130,7 @@ void LoadRankingScene()
 
 void LoadGameScene()
 {
-	
+	InitializeGame();
 }
 
 void LoadDifficultyChooseScene() {
@@ -222,6 +222,7 @@ void ButtonClickLoadHelp(Button* tis) {
 }
 
 void ButtonClickLoadGame(Button* tis) {
+	m_wave_ = twave;
 	LoadScene(SCENE_GAME);
 }
 

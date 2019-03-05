@@ -27,7 +27,13 @@
 #define V6_KEY_SET_WALL			88
 #define V6_KEY_PAUSE			80
 #define V6_KEY_ESC				27
+#define V6_KEY_SLOW				VK_SHIFT
+#define V6_KEY_NUM1				49
+#define V6_KEY_NUM2				50
+#define V6_KEY_NUM3				51
 
 // 游戏信息。
+// 难度种类数目。
+#define V6_DIFFICULTY_COUNT		3
 // 最大波数。
 #define V6_GAME_MAX_WAVE		30

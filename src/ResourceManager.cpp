@@ -90,6 +90,17 @@ void LoadImages() {
 	loadimage(&g_img_veasyFocus, _T("assets\\veasyFocus.png"));
 	loadimage(&g_img_eeasy, _T("assets\\eeasy.png"));
 	loadimage(&g_img_eeasyFocus, _T("assets\\eeasyFocus.png"));
+	loadimage(&g_img_attackTank[0], _T("assets\\attackTank.png"));
+	LoadDirections(g_img_attackTank);
+	loadimage(&g_img_attackTankMsk[0], _T("assets\\attackTank_Msk.png"));
+	LoadDirections(g_img_attackTankMsk);
+	loadimage(&g_img_sunTank, _T("assets\\sunTank.png"));
+	loadimage(&g_img_sunTankMsk, _T("assets\\sunTank_Msk.png"));
+	loadimage(&g_img_quickTank[0], _T("assets\\quickTank.png"));
+	LoadDirections(g_img_quickTank);
+	loadimage(&g_img_quickTankMsk[0], _T("assets\\quickTank_Msk.png"));
+	LoadDirections(g_img_quickTankMsk);
+	loadimage(&g_img_console, _T("assets\\console.png"));
 }
 
 IMAGE g_img_bigTank[4];
@@ -150,3 +161,10 @@ IMAGE g_img_veasy;
 IMAGE g_img_veasyFocus;
 IMAGE g_img_eeasy;
 IMAGE g_img_eeasyFocus;
+IMAGE g_img_attackTank[4];
+IMAGE g_img_attackTankMsk[4];
+IMAGE g_img_sunTank;
+IMAGE g_img_sunTankMsk;
+IMAGE g_img_quickTank[4];
+IMAGE g_img_quickTankMsk[4];
+IMAGE g_img_console;

@@ -2,6 +2,8 @@
 #include "LogicControl.h"
 #include "ResourceManager.h"
 #include "Scene.h"
+#include "DataModels.h"
+#include "RandomEngine.h"
 
 #pragma comment(lib,"winmm.lib")
 
@@ -9,18 +11,12 @@
 // 不要访问全局/成员变量。至少请不要修改它们。
 void Initialize() {
 	LoadResources();
+	FillData();
+	InitializeRandomEngine();
 	LoadScene(SCENE_MAIN);
 	initgraph(V6_WINDOWWIDTH, V6_WINDOWHEIGHT);
-	setbkmode(TRANSPARENT);
-	settextcolor(BLACK);
-
-	LOGFONT f;
-	gettextstyle(&f);
-	f.lfHeight = 25;
-	f.lfWeight = 700;
-	_tcscpy(f.lfFaceName, _T("幼圆"));
-	f.lfQuality = ANTIALIASED_QUALITY;
-	settextstyle(&f);
+	InitializeInputEnv();
+	InitializeRenderEnv();
 }
 
 int main() {

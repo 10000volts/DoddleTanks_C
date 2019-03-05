@@ -1,13 +1,10 @@
 #pragma once
 
 #include <easyx.h>
+#include "stdafx.h"
 
 // 开辟新的内存空间以加载公共资源。这些资源不应该在运行中被释放。
 void LoadResources();
-
-typedef enum _DIRECTION {
-	DRT_RIGHT, DRT_UP, DRT_LEFT, DRT_DOWN
-} DIRECTION;
 
 extern IMAGE g_img_bigTank[4];
 extern IMAGE g_img_bigTankBattery;
@@ -67,3 +64,10 @@ extern IMAGE g_img_veasy;
 extern IMAGE g_img_veasyFocus;
 extern IMAGE g_img_eeasy;
 extern IMAGE g_img_eeasyFocus;
+extern IMAGE g_img_attackTank[4];
+extern IMAGE g_img_attackTankMsk[4];
+extern IMAGE g_img_sunTank;
+extern IMAGE g_img_sunTankMsk;
+extern IMAGE g_img_quickTank[4];
+extern IMAGE g_img_quickTankMsk[4];
+extern IMAGE g_img_console;

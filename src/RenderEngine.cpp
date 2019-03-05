@@ -1,5 +1,18 @@
 #include "LogicControl.h"
 
+void InitializeRenderEnv()
+{
+	setbkmode(TRANSPARENT);
+	settextcolor(BLACK);
+	LOGFONT f;
+	gettextstyle(&f);
+	f.lfHeight = 25;
+	f.lfWeight = 700;
+	_tcscpy(f.lfFaceName, _T("свт╡"));
+	f.lfQuality = ANTIALIASED_QUALITY;
+	settextstyle(&f);
+}
+
 RenderSprite * CreateRenderSprite(IMAGE * image, IMAGE * mask, void(*render)(LogicSprite* e))
 {
 	RenderSprite* r = (RenderSprite*)malloc(sizeof(RenderSprite));
