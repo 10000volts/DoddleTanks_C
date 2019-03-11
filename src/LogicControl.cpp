@@ -2,14 +2,11 @@
 #include "MemoryManager.h"
 #include "Utility.h"
 
-void StepCheckFocus(LogicStep*);
+static void StepCheckFocus(int t, LogicStep*);
 
 void LoadLogicControlStepResource()
 {
-	g_stepCheckFocus_ = (LogicStep*)malloc(sizeof(LogicStep));
-	memset(g_stepCheckFocus_, 0, sizeof(LogicStep));
-	strcpy(g_stepCheckFocus_->m_stepName_, "CheckFocus");
-	g_stepCheckFocus_->Update = StepCheckFocus;
+	g_stepCheckFocus_ = CreateLogicStep((char*)"CheckFocus", StepCheckFocus);
 }
 
 void AddButton(Button * b)
@@ -29,6 +26,7 @@ void RemoveButton(Button * ls)
 	for (i = 0; i < buttonCount_; ++i) {
 		if (g_buttonManager_ + i == ls) {
 			if(i != buttonCount_ - 1) memcpy(g_buttonManager_ + i, g_buttonManager_ + i + 1, buttonCount_ - i - 1);
+			if (g_focusButton_ == ls) g_focusButton_ = NULL;
 			--buttonCount_;
 		}
 	}
@@ -62,8 +60,9 @@ int buttonCount_ = 0;
 // 按钮的容量。
 int buttonReserve_ = 0;
 
+LogicStep* g_stepCheckFocus_ = NULL;
 // 逻辑步骤：检查焦点状态。
-void StepCheckFocus(LogicStep* tis) {
+void StepCheckFocus(int t, LogicStep* tis) {
 	int i;
 	LONG mx = g_mouseState_.x, my = g_mouseState_.y;
 	LogicSprite* ls;

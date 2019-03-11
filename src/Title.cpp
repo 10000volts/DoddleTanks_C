@@ -20,18 +20,18 @@ void Initialize() {
 }
 
 int main() {
-	DWORD dwBegin, dwEnd, t;
+	DWORD dwBegin, dwEnd, t = (DWORD)0;
 	Initialize();
 	while (TRUE) {
 		dwBegin = timeGetTime();
 
 		InputUpdate();
-		LogicUpdate();
+		LogicUpdate(t);
 		RenderUpdate();
 
 		dwEnd = timeGetTime();
 		t = dwEnd - dwBegin;
-		if(t < V6_UPDATEINTERVAL) Sleep(V6_UPDATEINTERVAL - t);
+		if(t > V6_UPDATE_MAX_INTERVAL) t = V6_UPDATE_MAX_INTERVAL;
 	}
 	closegraph();
 	return 0;

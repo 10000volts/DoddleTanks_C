@@ -9,9 +9,10 @@ void InitializeRandomEngine()
 	seed = time(NULL);
 }
 
-double NextRand()
+static int r;
+int NextRand()
 {
-	seed = rand();
+	seed = rand() * rand();
 	srand(seed);
-	return rand() / RAND_MAX;
+	return rand() % 1024;
 }

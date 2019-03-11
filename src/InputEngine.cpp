@@ -10,7 +10,7 @@ typedef int KEY;
 static POINT tp;
 static LPPOINT tpos = &tp;
 static BOOLean mouse_down_state_changed, keyleft_down_state_changed, keyright_down_state_changed,
-			   num1_down_state_changed, num2_down_state_changed, num3_down_state_changed;
+			   pause_down_state_changed;
 
 void CheckUpAndDown(KEY k, BOOLean* down_state_changed, BOOLean* checkup, BOOLean* checkdown) {
 	*checkup = FALSE;
@@ -48,11 +48,9 @@ void InputUpdate() {
 	if (GetAsyncKeyState(V6_KEY_UP)) g_keyboardState_.up_down = TRUE; else g_keyboardState_.up_down = FALSE;
 	CheckUpAndDown(V6_KEY_RIGHT, &keyright_down_state_changed, &g_keyboardState_.right_up, &g_keyboardState_.right_down);
 	if (GetAsyncKeyState(V6_KEY_DOWN)) g_keyboardState_.down_down = TRUE; else g_keyboardState_.down_down = FALSE;
- 	if (GetAsyncKeyState(V6_KEY_PAUSE)) g_keyboardState_.pause_down = TRUE; else g_keyboardState_.pause_down = FALSE;
+ 	if (GetAsyncKeyState(V6_KEY_PAUSE)) g_keyboardState_.pause_down = TRUE; else g_keyboardState_.pause_down = FALSE; 
+	CheckUpAndDown(V6_KEY_PAUSE, &pause_down_state_changed, &g_keyboardState_.pause_up, &g_keyboardState_.pause_down);
 	if (GetAsyncKeyState(V6_KEY_ESC)) g_keyboardState_.esc_down = TRUE; else g_keyboardState_.esc_down = FALSE;
-	CheckUpAndDown(V6_KEY_NUM1, &num1_down_state_changed, &g_keyboardState_.num1_up, &g_keyboardState_.num1_down);
-	CheckUpAndDown(V6_KEY_NUM2, &num2_down_state_changed, &g_keyboardState_.num2_up, &g_keyboardState_.num2_down);
-	CheckUpAndDown(V6_KEY_NUM3, &num3_down_state_changed, &g_keyboardState_.num3_up, &g_keyboardState_.num3_down);
 }
 
 // 最新的鼠标状态。

@@ -4,50 +4,38 @@
 #include "stdafx.h"
 #include "InputEngine.h"
 #include "RenderEngine.h"
+#include "Container.h"
 
 typedef struct _LogicSprite {
 	// 返回此逻辑精灵的真正实体。
 	void* m_me_;
-	void (*Update)(struct _LogicSprite* _this);
+	// 更新回调函数。函数体中不能对Manager有任何修改的操作。
+	void (*Update)(int t, struct _LogicSprite* _this);
 	// 横坐标，纵坐标。
-	int m_x_, m_y_, m_w_, m_h_;
+	double m_x_, m_y_, m_w_, m_h_;
 	double m_angle_;
 
 	RenderSprite* m_body_;
 } LogicSprite;
 
 typedef struct _LogicStep {
-	void (*Update)(struct _LogicStep* _this);
+	void (*Update)(int t, struct _LogicStep* _this);
 
 	char m_stepName_[32];
 } LogicStep;
 
 // 逻辑更新。
-void LogicUpdate();
+void LogicUpdate(int t);
 void UnloadLogicEngine();
 
-// 将ls的副本添加至集合，之后释放ls。
-void AddLogicSprite(LogicSprite* ls);
-void RemoveLogicSprite(LogicSprite* ls);
-void ClearLogicSprites();
-void AddLogicStep(LogicStep* ls);
-void RemoveLogicStep(LogicStep* ls);
-void ClearLogicSteps();
-
-LogicSprite* CreateLogicSprite(void* me, void(*update)(LogicSprite*), int x, int y, int w, int h, void(*render)(LogicSprite* ls), IMAGE* im,
+LogicSprite* CreateLogicSprite(void* me, void(*update)(int t, LogicSprite*), int x, int y, int w, int h, void(*render)(LogicSprite* ls), IMAGE* im,
 	IMAGE* msk = NULL);
-LogicStep* CreateLogicStep(char stepname[], void(*update)(LogicStep* _this));
+LogicStep* CreateLogicStep(char stepname[], void(*update)(int t, LogicStep* _this));
 
-// 程序是否应该继续运行。
-extern BOOLean g_running_;
+// 逻辑步骤在遍历执行时是否因为已经修改而无法继续执行。
+extern BOOLean g_stepInvalid_;
 
-// 全部逻辑精灵的集合，本身为其中首元素的地址。仿照vector的机制进行内存管理。
-extern LogicSprite* g_logicSpriteManager_;
-extern int logicSpriteCount_;
-// 逻辑精灵集合的容量。
-extern int logicSpriteReserve_;
-// 全部逻辑步骤的集合，本身为其中首元素的地址。仿照vector的机制进行内存管理。
-extern LogicStep** g_logicStepManager_;
-extern int logicStepCount_;
-// 逻辑步骤集合的容量。
-extern int logicStepReserve_;
+// 全部逻辑精灵的集合。
+extern Container* g_logicSpriteManager_;
+// 全部逻辑步骤的集合。
+extern Container* g_logicStepManager_;

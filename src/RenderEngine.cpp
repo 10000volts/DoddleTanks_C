@@ -17,7 +17,9 @@ RenderSprite * CreateRenderSprite(IMAGE * image, IMAGE * mask, void(*render)(Log
 {
 	RenderSprite* r = (RenderSprite*)malloc(sizeof(RenderSprite));
 	r->m_image_ = image;
+	r->m_src_image_ = image;
 	r->m_mask_ = mask;
+	r->m_src_mask_ = mask;
 	r->Render = render;
 	return r;
 }
@@ -33,14 +35,16 @@ RenderButton * CreateRenderButton(IMAGE * defimage, IMAGE * defmask, IMAGE * fcs
 }
 
 static IMAGE t;
+static LogicSprite* tls;
 void RenderUpdate()
 {
 	int i;
 
 	BeginBatchDraw();
 	cleardevice();
-	for (i = 0; i < logicSpriteCount_; ++i) {
-		g_logicSpriteManager_[i].m_body_->Render(&g_logicSpriteManager_[i]);
+	for (i = 0; i < g_logicSpriteManager_->m_count_; ++i) {
+		tls = (LogicSprite *)g_logicSpriteManager_->m_me_[i];
+		tls->m_body_->Render(tls);
 	}
 	EndBatchDraw();
 }
@@ -50,14 +54,21 @@ void RenderSimple(LogicSprite* ls) {
 	putimage(ls->m_x_, ls->m_y_, ls->m_body_->m_image_);
 }
 
+void RenderWithScaling(LogicSprite * ls)
+{
+	putimage(ls->m_x_, ls->m_y_, ls->m_w_, ls->m_h_, ls->m_body_->m_mask_, 0, 0, NOTSRCERASE);
+	putimage(ls->m_x_, ls->m_y_, ls->m_w_, ls->m_h_, ls->m_body_->m_image_, 0, 0, SRCINVERT);
+}
+
+void RenderWithMask(LogicSprite * ls)
+{
+	putimage(ls->m_x_, ls->m_y_, ls->m_body_->m_mask_, NOTSRCERASE);
+	putimage(ls->m_x_, ls->m_y_, ls->m_body_->m_image_, SRCINVERT);
+}
+
 void RenderWithRotation(LogicSprite* ls) {
 	rotateimage(&t, ls->m_body_->m_mask_, ls->m_angle_, BLACK);
 	putimage(ls->m_x_, ls->m_y_, &t, NOTSRCERASE);
 	rotateimage(&t, ls->m_body_->m_image_, ls->m_angle_, WHITE);
-	putimage(ls->m_x_, ls->m_y_, &t, SRCINVERT);
-}
-
-void RenderWithDirection(LogicSprite* ls) {
-	putimage(ls->m_x_, ls->m_y_, &t, NOTSRCERASE);
 	putimage(ls->m_x_, ls->m_y_, &t, SRCINVERT);
 }

@@ -5,10 +5,9 @@
 
 typedef struct _KEYBOARDSTATE {
 	// 左是否被按下？上……？
-	BOOLean left_down, up_down, right_down, down_down, shoot_down, set_wall_down, pause_down, esc_down, slow_down,
-		num1_down, num2_down, num3_down;
+	BOOLean left_down, up_down, right_down, down_down, shoot_down, set_wall_down, pause_down, esc_down, slow_down;
 	// 左是否弹起？……
-	BOOLean left_up, right_up, num1_up, num2_up, num3_up;
+	BOOLean left_up, right_up, pause_up;
 } KeyBoardState;
 
 typedef struct _MOUSESTATE {

@@ -1,4 +1,5 @@
 #include "MemoryManager.h"
+#include "Container.h"
 
 // 扩容并复制。p: 准备进行扩容的指针。 siz: 需复制的元素个数。 elesiz: 每个元素占用空间的大小。 exsiz: 扩容后的空间能容纳的元素数。
 void* ExtendAndCopy(void* p, size_t siz, size_t elesiz, size_t exsiz) {
@@ -10,3 +11,5 @@ void* ExtendAndCopy(void* p, size_t siz, size_t elesiz, size_t exsiz) {
 	free(p);
 	return r;
 }
+
+Container* g_extraContainer = CreateContainer(sizeof(void*), TRUE);

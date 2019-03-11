@@ -3,10 +3,12 @@
 #include <easyx.h>
 #include "stdafx.h"
 
+#define V6_PROGRESSBAR_WIDTH	250
+
 // 开辟新的内存空间以加载公共资源。这些资源不应该在运行中被释放。
 void LoadResources();
 
-extern IMAGE g_img_bigTank[4];
+extern IMAGE g_img_bigTank;
 extern IMAGE g_img_bigTankBattery;
 extern IMAGE g_img_bossTank;
 extern IMAGE g_img_castle;
@@ -31,14 +33,14 @@ extern IMAGE g_img_rankingList;
 extern IMAGE g_img_rankingListFocus;
 extern IMAGE g_img_heart;
 extern IMAGE g_img_hp;
-extern IMAGE g_img_hpEmpty;
+extern IMAGE g_img_emptyHp;
 extern IMAGE g_img_help;
 extern IMAGE g_img_helpFocus;
 extern IMAGE g_img_helpDetail;
 extern IMAGE g_img_back;
 extern IMAGE g_img_backFocus;
 extern IMAGE g_img_bigTankBatteryMsk;
-extern IMAGE g_img_bigTankMsk[4];
+extern IMAGE g_img_bigTankMsk;
 extern IMAGE g_img_bossTankMsk;
 extern IMAGE g_img_castleMsk;
 extern IMAGE g_img_emptyHpMsk;
@@ -71,3 +73,4 @@ extern IMAGE g_img_sunTankMsk;
 extern IMAGE g_img_quickTank[4];
 extern IMAGE g_img_quickTankMsk[4];
 extern IMAGE g_img_console;
+extern IMAGE g_img_gameOver;

@@ -1,6 +1,7 @@
 #include "ResourceManager.h"
 #include "LogicControl.h"
 #include "Scene.h"
+#include "Game.h"
 
 void LoadImages();
 
@@ -15,12 +16,12 @@ void LoadResources()
 {
 	LoadLogicControlStepResource();
 	LoadSceneStepResource();
+	LoadGameStepResource();
 	LoadImages();
 }
 
 void LoadImages() {
-	loadimage(&g_img_bigTank[0], _T("assets\\bigtank.png"));
-	LoadDirections(g_img_bigTank);
+	loadimage(&g_img_bigTank, _T("assets\\bigtank.png"));
 	loadimage(&g_img_bigTankBattery, _T("assets\\bigtank_battery.png"));
 	loadimage(&g_img_bossTank, _T("assets\\bosstank.png"));
 	loadimage(&g_img_castle, _T("assets\\castle.png"));
@@ -50,15 +51,14 @@ void LoadImages() {
 	loadimage(&g_img_rankingListFocus, _T("assets\\rankinglistfocus.png"));
 	loadimage(&g_img_heart, _T("assets\\heart.png"));
 	loadimage(&g_img_hp, _T("assets\\hp.png"));
-	loadimage(&g_img_hpEmpty, _T("assets\\hpempty.png"));
+	loadimage(&g_img_emptyHp, _T("assets\\emptyHp.png"));
 	loadimage(&g_img_help, _T("assets\\help.png"));
 	loadimage(&g_img_helpFocus, _T("assets\\helpfocus.png"));
 	loadimage(&g_img_helpDetail, _T("assets\\helpdetail.png"));
 	loadimage(&g_img_back, _T("assets\\back.png"));
 	loadimage(&g_img_backFocus, _T("assets\\backfocus.png"));
-	loadimage(&g_img_bigTankBatteryMsk, _T("assets\\bigTankBattery_Msk.png"));
-	loadimage(&g_img_bigTankMsk[0], _T("assets\\bigTank_Msk.png"));
-	LoadDirections(g_img_bigTankMsk);
+	loadimage(&g_img_bigTankBatteryMsk, _T("assets\\bigTank_Battery_Msk.png"));
+	loadimage(&g_img_bigTankMsk, _T("assets\\bigTank_Msk.png"));
 	loadimage(&g_img_bossTankMsk, _T("assets\\bossTank_Msk.png"));
 	loadimage(&g_img_castleMsk, _T("assets\\castle_Msk.png"));
 	loadimage(&g_img_emptyHpMsk, _T("assets\\emptyHp_Msk.png"));
@@ -79,7 +79,6 @@ void LoadImages() {
 	loadimage(&g_img_bigBullet, _T("assets\\bigBullet.png"));
 	loadimage(&g_img_smallBullet, _T("assets\\smallbullet.png"));
 	loadimage(&g_img_mainTitle2, _T("assets\\maintitle2.png"));
-	loadimage(&g_img_hpMsk, _T("assets\\hp_Msk.png"));
 	loadimage(&g_img_save, _T("assets\\save.png"));
 	loadimage(&g_img_saveFocus, _T("assets\\saveFocus.png"));
 	loadimage(&g_img_loadGame, _T("assets\\loadGame.png"));
@@ -101,9 +100,10 @@ void LoadImages() {
 	loadimage(&g_img_quickTankMsk[0], _T("assets\\quickTank_Msk.png"));
 	LoadDirections(g_img_quickTankMsk);
 	loadimage(&g_img_console, _T("assets\\console.png"));
+	loadimage(&g_img_gameOver, _T("assets\\gameOver.png"));
 }
 
-IMAGE g_img_bigTank[4];
+IMAGE g_img_bigTank;
 IMAGE g_img_bigTankBattery;
 IMAGE g_img_bossTank;
 IMAGE g_img_castle;
@@ -128,14 +128,14 @@ IMAGE g_img_rankingList;
 IMAGE g_img_rankingListFocus;
 IMAGE g_img_heart;
 IMAGE g_img_hp;
-IMAGE g_img_hpEmpty;
+IMAGE g_img_emptyHp;
 IMAGE g_img_help;
 IMAGE g_img_helpFocus;
 IMAGE g_img_helpDetail;
 IMAGE g_img_back;
 IMAGE g_img_backFocus;
 IMAGE g_img_bigTankBatteryMsk;
-IMAGE g_img_bigTankMsk[4];
+IMAGE g_img_bigTankMsk;
 IMAGE g_img_bossTankMsk;
 IMAGE g_img_castleMsk;
 IMAGE g_img_emptyHpMsk;
@@ -167,4 +167,5 @@ IMAGE g_img_sunTank;
 IMAGE g_img_sunTankMsk;
 IMAGE g_img_quickTank[4];
 IMAGE g_img_quickTankMsk[4];
-IMAGE g_img_console;
+IMAGE g_img_console; 
+IMAGE g_img_gameOver;

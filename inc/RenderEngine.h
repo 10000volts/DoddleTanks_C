@@ -6,10 +6,14 @@ struct _LogicSprite;
 typedef _LogicSprite LogicSprite;
 
 typedef struct _RenderSprite {
-	// 原本的图片。不能作任何修改。
+	// 不能作任何修改。
 	IMAGE* m_image_;
-	// 原本的掩码图片。不能作任何修改。
+	// 掩码图片。不能作任何修改。
 	IMAGE* m_mask_;
+	// 原图片。
+	IMAGE* m_src_image_;
+	// 原掩码图片。
+	IMAGE* m_src_mask_;
 	void (*Render)(LogicSprite* e);
 } RenderSprite;
 
@@ -34,9 +38,8 @@ void RenderUpdate();
 
 // 只绘制原图像，覆盖原有像素。
 void RenderSimple(LogicSprite* ls);
+void RenderWithScaling(LogicSprite* ls);
 // 带有透明的绘制。
 void RenderWithMask(LogicSprite* ls);
 // 带有透明、旋转的渲染。
 void RenderWithRotation(LogicSprite* ls);
-// 带有透明、朝向的渲染。(不具有旋转)
-void RenderWithDirection(LogicSprite* ls);
