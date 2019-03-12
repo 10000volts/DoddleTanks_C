@@ -24,6 +24,8 @@ typedef struct _TankData {
 	double m_damageRatioToBuilding_;
 	// 奖励分数。
 	int m_score_;
+	// 额外数据。通常可以用于区分不同难度的不同行为。
+	int m_exdata_;
 } TankData;
 
 // 填充数据。

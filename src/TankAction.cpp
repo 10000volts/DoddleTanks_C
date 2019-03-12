@@ -177,8 +177,140 @@ lbl_move_comp:
 	tis->m_shoot_ = TRUE;
 }
 
+void TankLanlingkingAI(Tank * t)
+{
+	LanlingkingTank* ex = (LanlingkingTank*)t->m_extra_;
+	if (ex->m_contiousShootCountLeft_ > 0 | Distance2(t->m_super_->m_x_, t->m_super_->m_y_, m_playerTank_->m_super_->m_x_, m_playerTank_->m_super_->m_y_) <= 160000) {
+		t->m_move_down_ = FALSE;
+		t->m_move_up_ = FALSE;
+		t->m_move_left_ = FALSE;
+		t->m_move_right_ = FALSE;
+		t->m_shoot_ = TRUE;
+	}
+	else {
+		int d = NextRand();
+		if (d < 10) {
+			t->m_move_right_ = TRUE;
+			t->m_move_up_ = FALSE;
+			t->m_move_left_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else if (d < 20) {
+			t->m_move_up_ = TRUE;
+			t->m_move_right_ = FALSE;
+			t->m_move_left_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else if (d < 30) {
+			t->m_move_left_ = TRUE;
+			t->m_move_up_ = FALSE;
+			t->m_move_right_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else if (d < 45) {
+			t->m_move_down_ = TRUE;
+			t->m_move_up_ = FALSE;
+			t->m_move_left_ = FALSE;
+			t->m_move_right_ = FALSE;
+		}
+
+		t->m_shoot_ = FALSE;
+	}
+}
+
 void TankAttackAI(Tank * t)
 {
+	int d = NextRand();
+	AttackTank* ex = (AttackTank*)t->m_extra_;
+	if (d < 5) {
+		ex->m_tracking_ = FALSE;
+	}
+	else if (d < 15) {
+		ex->m_tracking_ = TRUE;
+	}
+	else if (d < 17) {
+		ex->m_aim_ = m_playerTank_;
+	}
+	else if (d < 19) {
+		ex->m_aim_ = m_stronghold_;
+	}
+
+	if (ex->m_tracking_) {
+		BOOLean *xd = NULL, *rxd = NULL, *yd = NULL, *ryd = NULL;
+		if (t->m_super_->m_x_ < ex->m_aim_->m_super_->m_x_ - V6_TANK_HALF_EDGE_LENGTH) {
+			xd = &t->m_move_right_;
+			rxd = &t->m_move_left_;
+		}
+		else if (t->m_super_->m_x_ > ex->m_aim_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH) {
+			xd = &t->m_move_left_;
+			rxd = &t->m_move_right_;
+		}
+		if (t->m_super_->m_y_ < ex->m_aim_->m_super_->m_y_ - V6_TANK_HALF_EDGE_LENGTH) {
+			yd = &t->m_move_down_;
+			ryd = &t->m_move_up_;
+		}
+		else if (t->m_super_->m_y_ > ex->m_aim_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH) {
+			yd = &t->m_move_up_;
+			ryd = &t->m_move_down_;
+		}
+
+		if (xd == NULL) {
+			if (yd != NULL) {
+				*yd = TRUE;
+				*ryd = FALSE;
+			}
+			t->m_move_left_ = FALSE;
+			t->m_move_right_ = FALSE;
+		}
+		else if (yd == NULL) {
+			*xd = TRUE;
+			*rxd = FALSE;
+			t->m_move_up_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else {
+			if (d > 511) {
+				*xd = TRUE; 
+				*rxd = FALSE;
+				t->m_move_up_ = FALSE;
+				t->m_move_down_ = FALSE;
+			} else {
+				*yd = TRUE;
+				*ryd = FALSE;
+				t->m_move_left_ = FALSE;
+				t->m_move_right_ = FALSE;
+			} 
+		}
+	}
+	else {
+		d = NextRand();
+		if (d < 10) {
+			t->m_move_right_ = TRUE;
+			t->m_move_up_ = FALSE;
+			t->m_move_left_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else if (d < 20) {
+			t->m_move_up_ = TRUE;
+			t->m_move_right_ = FALSE;
+			t->m_move_left_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else if (d < 30) {
+			t->m_move_left_ = TRUE;
+			t->m_move_up_ = FALSE;
+			t->m_move_right_ = FALSE;
+			t->m_move_down_ = FALSE;
+		}
+		else if (d < 40) {
+			t->m_move_down_ = TRUE;
+			t->m_move_up_ = FALSE;
+			t->m_move_left_ = FALSE;
+			t->m_move_right_ = FALSE;
+		}
+	}
+
+	t->m_shoot_ = TRUE;
 }
 
 void TankJunkAct(int t, Tank * tis)
@@ -262,6 +394,30 @@ void TankFiveAct(int t, Tank * tis)
 
 void TankQuickAct(int t, Tank * tis)
 {
+	double s = tis->m_data_.m_bulletSpeed_ + NextRand() % tis->m_data_.m_exdata_;
+	double sa = tis->m_shoot_angle_ + (NextRand() % V6_RAND_MAX) * V6_DRT_RIGHTUP - V6_DRT_RIGHTUP / 2;
+
+	NormalMoveAct(t, tis);
+
+	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ == 0) {
+		double sx = s * cos(sa);
+		double sy = -s * sin(sa);
+		int big = NextRand() % 5;
+		LogicSprite* ls;
+		if (big == 0) {
+			ls = CreateBigBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
+				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
+				tis->m_data_.m_atk_, FALSE, sx, sy, BulletNormalUpdate);
+		}
+		else {
+			ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+				tis->m_data_.m_atk_ * 3 / 2, TRUE, sx, sy, BulletNormalUpdate);
+		}
+		AddElement(g_logicSpriteManager_, ls);
+		AddElement(m_enemyBulletList_, ls->m_me_);
+		tis->m_shootCD_ = tis->m_data_.m_shootInterval_;
+	}
 }
 
 void TankSunAct(int t, Tank * tis)
@@ -269,7 +425,7 @@ void TankSunAct(int t, Tank * tis)
 	NormalMoveAct(t, tis);
 
 	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ == 0) {
-		double sa = double(NextRand()) * V6_PI / 1023;
+		double sa = double(NextRand()) * V6_PI / V6_RAND_MAX;
 		int i;
 		for (i = 0; i < 8; ++i) {
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(sa);
@@ -287,6 +443,61 @@ void TankSunAct(int t, Tank * tis)
 
 void TankLanlingkingAct(int t, Tank * tis)
 {
+	NormalMoveAct(t, tis);
+
+	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ == 0) {
+		LanlingkingTank* ex = (LanlingkingTank*)tis->m_extra_;
+		if (ex->m_contiousShootCountLeft_) {
+			double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
+			double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_);
+			LogicSprite* ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+				tis->m_data_.m_atk_, TRUE, sx, sy, BulletNormalUpdate);
+			AddElement(g_logicSpriteManager_, ls);
+			AddElement(m_enemyBulletList_, ls->m_me_);
+			--ex->m_contiousShootCountLeft_;
+			if (ex->m_contiousShootCountLeft_ != 0)
+				tis->m_shootCD_ = 75;
+			else 
+				tis->m_shootCD_ = tis->m_data_.m_shootInterval_;
+		}
+		else {
+			int stx = tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+				sty = tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2;
+			tis->m_shoot_angle_ = CalAngle(stx, sty,
+				m_playerTank_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH, m_playerTank_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH);
+			double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
+			double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_);
+			LogicSprite* ls = CreateSmallBullet(tis, stx, sty,
+				tis->m_data_.m_atk_, TRUE, sx, sy, BulletNormalUpdate);
+			AddElement(g_logicSpriteManager_, ls);
+			AddElement(m_enemyBulletList_, ls->m_me_);
+			tis->m_shootCD_ = 75;
+			ex->m_contiousShootCountLeft_ = 4;
+		}
+	}
+}
+
+void TankAttackAct(int t, Tank * tis)
+{
+	NormalMoveAct(t, tis);
+
+	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ == 0) {
+		int stx = tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
+			sty = tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2;
+		double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
+		double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_); 
+		LogicSprite* ls;
+
+		tis->m_shoot_angle_ = CalAngle(stx, sty,
+			m_playerTank_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH, m_playerTank_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH);
+
+		ls = CreateBigBullet(tis, stx, sty,
+			tis->m_data_.m_atk_, FALSE, sx, sy, BulletNormalUpdate);
+		AddElement(g_logicSpriteManager_, ls);
+		AddElement(m_enemyBulletList_, ls->m_me_);
+		tis->m_shootCD_ = tis->m_data_.m_shootInterval_;
+	}
 }
 
 void NormalMoveAct(int t, Tank* tis) {

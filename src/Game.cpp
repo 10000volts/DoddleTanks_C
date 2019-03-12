@@ -63,6 +63,9 @@ static void SetNewQuickTank(int x, int y);
 static void SetNewSunTank(int x, int y);
 // 没有作生成合法性判定。
 static void SetNewLanlingkingTank(int x, int y);
+// 没有作生成合法性判定。
+static void SetNewAttackTank(int x, int y);
+static void BossCome(int x, int y);
 
 // 判断在指定列表内的坦克元素是否与指定矩形有碰撞。
 static BOOLean CheckPointLegal(int x, int y, int w, int h, Container* c);
@@ -390,6 +393,7 @@ void StepCheckValid() {
 	for (i = 0; i < m_playerTankList_->m_count_; ++i) {
 		tk = (Tank*)m_playerTankList_->m_me_[i];
 		if (!tk->m_valid_) {
+			if (tk->m_extra_ != NULL) free(tk->m_extra_);
 			RemoveElement(g_logicSpriteManager_, tk->m_super_);
 			RemoveElement(m_playerTankList_, tk);
 			--i;
@@ -398,6 +402,7 @@ void StepCheckValid() {
 	for (i = 0; i < m_enemyTankList_->m_count_; ++i) {
 		tk = (Tank*)m_enemyTankList_->m_me_[i];
 		if (!tk->m_valid_) {
+			if (tk->m_extra_ != NULL) free(tk->m_extra_);
 			RemoveElement(g_logicSpriteManager_, tk->m_super_);
 			RemoveElement(m_enemyTankList_, tk);
 			--i;
@@ -406,6 +411,7 @@ void StepCheckValid() {
 	for (i = 0; i < m_neutralTankList_->m_count_; ++i) {
 		tk = (Tank*)m_neutralTankList_->m_me_[i];
 		if (!tk->m_valid_) {
+			if (tk->m_extra_ != NULL) free(tk->m_extra_);
 			RemoveElement(g_logicSpriteManager_, tk->m_super_);
 			RemoveElement(m_neutralTankList_, tk);
 			--i;
@@ -499,6 +505,12 @@ void SetNewTank(TANKSTYLE ts, int x, int y)
 	case TANK_SUN:
 		SetNewSunTank(x, y);
 		break;
+	case TANK_LANLINGKING:
+		SetNewLanlingkingTank(x, y);
+		break;
+	case TANK_ATTACK:
+		SetNewAttackTank(x, y);
+		break;
 	}
 }
 void SetNewJunkTank(int x, int y)
@@ -524,7 +536,7 @@ void SetNewPrismTank(int x, int y)
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_prismTank, g_img_prismTankMsk);
 	Tank* t = CreatePrismTank(ls);
-	t->m_shoot_angle_ = (double)(NextRand() / 1023) * V6_PI * 2;
+	t->m_shoot_angle_ = (double)(NextRand()) / V6_RAND_MAX * V6_PI * 2;
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
@@ -540,6 +552,12 @@ void SetNewFiveTank(int x, int y)
 }
 void SetNewQuickTank(int x, int y)
 {
+	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
+		RenderWithMask, g_img_quickTank, g_img_quickTankMsk);
+	Tank* t = CreateQuickTank(ls);
+	ls->m_me_ = t;
+	AddElement(g_logicSpriteManager_, ls);
+	AddElement(m_enemyTankList_, t);
 }
 void SetNewSunTank(int x, int y)
 {
@@ -552,6 +570,25 @@ void SetNewSunTank(int x, int y)
 }
 void SetNewLanlingkingTank(int x, int y)
 {
+	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
+		RenderWithMask, g_img_lanlingkingTank, g_img_lanlingkingTankMsk);
+	Tank* t = CreateLanlingkingTank(ls);
+	ls->m_me_ = t;
+	AddElement(g_logicSpriteManager_, ls);
+	AddElement(m_enemyTankList_, t);
+}
+void SetNewAttackTank(int x, int y)
+{
+	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
+		RenderWithMask, g_img_attackTank, g_img_attackTankMsk);
+	Tank* t = CreateAttackTank(ls);
+	ls->m_me_ = t;
+	AddElement(g_logicSpriteManager_, ls);
+	AddElement(m_enemyTankList_, t);
+}
+void BossCome(int x, int y)
+{
+
 }
 void GenerateItem(int x, int y, ITEMSTYLE is)
 {

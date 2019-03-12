@@ -91,11 +91,14 @@ void LoadMainScene()
 	AddElement(g_logicSpriteManager_, ls);
 	b = CreateButton(ls, ButtonClickExit, ButtonFocusDefault, ButtonLeaveDefault, &g_img_exit, NULL, &g_img_exitFocus);
 	AddButton(b);
+
+	ls = CreateLogicSprite(NULL, NULL, 350, 70, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderWithMask, &g_img_bossTank, &g_img_bossTankMsk);
+	AddElement(g_logicSpriteManager_, ls);
 }
 
 // LogicSpriteUpdate
 void LSUDecorate(int t, LogicSprite* tis) {
-	tis->m_angle_ += 0.1;
+	tis->m_angle_ += 5.0 * t / 1000;
 	if (tis->m_angle_ >= 2 * V6_PI) tis->m_angle_ -= 2 * V6_PI;
 }
 void LoadHelpScene()

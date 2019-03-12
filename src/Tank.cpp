@@ -107,16 +107,16 @@ Tank * CreateFiveTank(LogicSprite * ls)
 	return t;
 }
 
-//Tank * CreateQuickTank(LogicSprite * ls)
-//{
-//	//Tank* t = CreateTank(TANK_JUNK, NULL, ls, g_junkTankData_[g_gameDifficulty_],
-//	//	22, 18, 41, 41, 15, 13, 55, 56,
-//	//	0.0);
-//	//t->Decide = TankJunkAI;
-//	//t->Act = TankJunkAct;
-//	//ChangeTankOrientation(t, double(NextRand() % 4) * V6_DRT_UP);
-//	//return t;
-//}
+Tank * CreateQuickTank(LogicSprite * ls)
+{
+	Tank* t = CreateTank(TANK_QUICK, NULL, ls, g_quickTankData_[g_gameDifficulty_],
+		10, 35, 61, 15, 10, 29, 61, 27,
+		0.0);
+	t->Decide = TankJunkAI;
+	t->Act = TankQuickAct;
+	ChangeTankOrientation(t, double(NextRand() % 4) * V6_DRT_UP);
+	return t;
+}
 
 Tank * CreateSunTank(LogicSprite * ls)
 {
@@ -125,20 +125,43 @@ Tank * CreateSunTank(LogicSprite * ls)
 		0.0);
 	t->Decide = TankFiveAI;
 	t->Act = TankSunAct;
+	t->m_noOrientation_ = TRUE;
 	ChangeTankOrientation(t, double(NextRand() % 4) * V6_DRT_UP);
 	return t;
 }
 
-//Tank * CreateLanlingkingTank(LogicSprite * ls)
-//{
-//	//Tank* t = CreateTank(TANK_JUNK, NULL, ls, g_junkTankData_[g_gameDifficulty_],
-//	//	23, 23, 33, 33, 9, 9, 63, 63,
-//	//	0.0);
-//	//t->Decide = TankJunkAI;
-//	//t->Act = TankJunkAct;
-//	//ChangeTankOrientation(t, double(NextRand() % 4) * V6_DRT_UP);
-//	//return t;
-//}
+Tank * CreateLanlingkingTank(LogicSprite * ls)
+{
+	Tank* t = CreateTank(TANK_JUNK, NULL, ls, g_lanlingkingTankData_[g_gameDifficulty_],
+		23, 23, 33, 33, 9, 9, 63, 63,
+		0.0);
+	t->Decide = TankLanlingkingAI;
+	t->Act = TankLanlingkingAct;
+	LanlingkingTank* ex = (LanlingkingTank*)malloc(sizeof(LanlingkingTank));
+	ex->m_contiousShootCountLeft_ = 0;
+	t->m_extra_ = ex;
+	ChangeTankOrientation(t, double(NextRand() % 4) * V6_DRT_UP);
+	return t;
+}
+
+Tank * CreateAttackTank(LogicSprite * ls)
+{
+	Tank* t = CreateTank(TANK_ATTACK, NULL, ls, g_attackTankData_[g_gameDifficulty_],
+		18, 30, 43, 17, 15, 21, 49, 33,
+		0.0);
+	t->Decide = TankAttackAI;
+	t->Act = TankAttackAct;
+	AttackTank* ex = (AttackTank*)malloc(sizeof(AttackTank));
+	if (NextRand() % 2) 
+		ex->m_aim_ = m_playerTank_;
+	else
+		ex->m_aim_ = m_stronghold_;
+	ex->m_tracking_ = NextRand() % 2;
+	t->m_extra_ = ex;
+	t->m_noOrientation_ = TRUE;
+	ChangeTankOrientation(t, double(NextRand() % 4) * V6_DRT_UP);
+	return t;
+}
 
 void ChangeTankOrientation(Tank * t, double ori)
 {

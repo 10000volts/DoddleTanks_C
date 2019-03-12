@@ -75,13 +75,30 @@ Tank* CreateJunkTank(LogicSprite* ls);
 Tank* CreateBigTank(LogicSprite* ls);
 Tank* CreatePrismTank(LogicSprite* ls);
 Tank* CreateFiveTank(LogicSprite* ls);
-// Tank* CreateQuickTank(LogicSprite* ls);
+Tank* CreateQuickTank(LogicSprite* ls);
 Tank* CreateSunTank(LogicSprite* ls);
-// Tank* CreateLanlingkingTank(LogicSprite* ls);
+Tank* CreateLanlingkingTank(LogicSprite* ls);
+Tank* CreateAttackTank(LogicSprite* ls);
 
-typedef struct _PrismTank {
-	double m_shoot_angle_;
-} PrismTank;
+typedef struct _LanlingkingTank {
+	// 连续射击剩余次数。
+	int m_contiousShootCountLeft_;
+} LanlingkingTank;
+
+typedef struct _AttackTank {
+	// 追踪的目标。
+	Tank* m_aim_;
+
+	// 是否正在追踪目标。
+	BOOLean m_tracking_;
+} AttackTank;
+
+typedef struct _BossTank {
+	// 攻击模式。0：扫荡 1：双重扫荡 2：摇摆 3：包围 4：反弹 5：翅膀 6：召唤
+	int m_attack_mode_;
+	// 此模式的剩余攻击时间。
+	int m_attack_time_left_;
+};
 
 // 更改坦克的朝向并根据noOrientation属性判断是否据此修改碰撞判定。
 void ChangeTankOrientation(Tank* t, double ori);
