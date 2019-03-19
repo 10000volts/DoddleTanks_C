@@ -16,6 +16,8 @@ typedef struct _LogicSprite {
 	double m_angle_;
 
 	RenderSprite* m_body_;
+
+	BOOLean m_valid_;
 } LogicSprite;
 
 typedef struct _LogicStep {
@@ -32,6 +34,9 @@ LogicSprite* CreateLogicSprite(void* me, void(*update)(int t, LogicSprite*), int
 	IMAGE* msk = NULL);
 LogicStep* CreateLogicStep(char stepname[], void(*update)(int t, LogicStep* _this));
 
+// 初始化加载逻辑步骤资源。
+void LoadLogicSpriteStepResource();
+
 // 逻辑步骤在遍历执行时是否因为已经修改而无法继续执行。
 extern BOOLean g_stepInvalid_;
 
@@ -39,3 +44,6 @@ extern BOOLean g_stepInvalid_;
 extern Container* g_logicSpriteManager_;
 // 全部逻辑步骤的集合。
 extern Container* g_logicStepManager_;
+
+// LogicStep资源。
+extern LogicStep* g_stepCheckSpriteValid_;

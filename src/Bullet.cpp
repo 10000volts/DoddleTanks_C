@@ -1,7 +1,8 @@
 #include "Bullet.h"
 #include "LogicEngine.h"
 
-LogicSprite * CreateSmallBullet(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double speedx, double speedy, void(*update)(int t, Bullet *b))
+LogicSprite * CreateSmallBullet(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double speedx, double speedy, void(*update)(int t, Bullet *b),
+	double xmin, double ymin, double xmax, double ymax)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, 20, 20, RenderWithMask, &g_img_smallBullet, &g_img_smallBulletMsk);
 	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
@@ -13,12 +14,17 @@ LogicSprite * CreateSmallBullet(Tank* sender, int x, int y, int atk, BOOLean ign
 	b->m_speedX_ = speedx;
 	b->m_speedY_ = speedy;
 	b->Update = update;
+	b->m_validXMin_ = xmin;
+	b->m_validYMin_ = ymin;
+	b->m_validXMax_ = xmax;
+	b->m_validYMax_ = ymax;
 	b->m_valid_ = TRUE;
 	ls->m_me_ = b;
 	return ls;
 }
 
-LogicSprite * CreateBigBullet(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double speedx, double speedy, void(*update)(int t, Bullet *b))
+LogicSprite * CreateBigBullet(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double speedx, double speedy, void(*update)(int t, Bullet *b),
+	double xmin, double ymin, double xmax, double ymax)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, 80, 80, RenderWithMask, &g_img_bigBullet, &g_img_bigBulletMsk);
 	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
@@ -30,6 +36,10 @@ LogicSprite * CreateBigBullet(Tank* sender, int x, int y, int atk, BOOLean ignor
 	b->m_speedX_ = speedx;
 	b->m_speedY_ = speedy;
 	b->Update = update;
+	b->m_validXMin_ = xmin;
+	b->m_validYMin_ = ymin;
+	b->m_validXMax_ = xmax;
+	b->m_validYMax_ = ymax;
 	b->m_valid_ = TRUE;
 	ls->m_me_ = b;
 	return ls;

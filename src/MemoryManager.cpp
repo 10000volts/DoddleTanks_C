@@ -11,5 +11,3 @@ void* ExtendAndCopy(void* p, size_t siz, size_t elesiz, size_t exsiz) {
 	free(p);
 	return r;
 }
-
-Container* g_extraContainer = CreateContainer(sizeof(void*), TRUE);

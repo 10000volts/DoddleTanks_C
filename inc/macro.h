@@ -15,6 +15,9 @@
 #define V6_DRT_LEFTUP			(V6_PI * 3 / 4)
 #define V6_DRT_LEFTDOWN			(V6_PI * 5 / 4)
 #define V6_DRT_RIGHTDOWN		(V6_PI * 7 / 4)
+// 顺时针。
+#define V6_CLOCKWISE					-1.0
+#define V6_ANTICLOCKWISE				1.0
 
 // 窗体信息。
 #define V6_WINDOWWIDTH			1024
@@ -33,7 +36,7 @@
 #define V6_KEY_DOWN				83
 #define V6_KEY_SHOOT			V6_MOUSE_LEFT
 #define V6_KEY_SET_WALL			69
-#define V6_KEY_PAUSE			80
+#define V6_KEY_PAUSE			2
 #define V6_KEY_ESC				27
 #define V6_KEY_SLOW				VK_SHIFT
 #define V6_KEY_NUM1				49

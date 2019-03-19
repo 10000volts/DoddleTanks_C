@@ -1,5 +1,6 @@
 #include "Tank.h"
 #include "TankAction.h"
+#include "BossTankAction.h"
 #include "RandomEngine.h"
 
 Tank* CreateTank(TANKSTYLE tankstyle, void * me, LogicSprite * super, TankData td, 
@@ -147,7 +148,7 @@ Tank * CreateLanlingkingTank(LogicSprite * ls)
 Tank * CreateAttackTank(LogicSprite * ls)
 {
 	Tank* t = CreateTank(TANK_ATTACK, NULL, ls, g_attackTankData_[g_gameDifficulty_],
-		18, 30, 43, 17, 15, 21, 49, 33,
+		19, 30, 43, 18, 15, 19, 49, 36,
 		0.0);
 	t->Decide = TankAttackAI;
 	t->Act = TankAttackAct;

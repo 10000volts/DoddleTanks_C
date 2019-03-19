@@ -5,8 +5,9 @@
 #include "ResourceManager.h"
 #include "RandomEngine.h"
 #include "Utility.h"
+#include "Trigger.h"
 
-#define V6_GAME_TIME	1800000
+#define V6_GAME_TIME	2700000
 #define V6_ADJUST_TIME	5000
 typedef Tank Respawn;
 
@@ -35,6 +36,8 @@ static void StepTankAct(int t);
 static void StepBulletAct(int t);
 // 碰撞判定。不会清除子弹和坦克。
 static void StepCheckCollision();
+// 检查并执行触发器。
+void StepRunTrigger(int t);
 // 清除死亡的坦克和子弹。
 static void StepCheckValid();
 
@@ -65,10 +68,9 @@ static void SetNewSunTank(int x, int y);
 static void SetNewLanlingkingTank(int x, int y);
 // 没有作生成合法性判定。
 static void SetNewAttackTank(int x, int y);
-static void BossCome(int x, int y);
 
-// 判断在指定列表内的坦克元素是否与指定矩形有碰撞。
-static BOOLean CheckPointLegal(int x, int y, int w, int h, Container* c);
+// 判断在指定列表内的坦克元素是否与指定矩形有碰撞。若有，返回该坦克。
+static Tank* CheckRectWithTankList(int x, int y, int w, int h, Container* c);
 // 判断子弹与坦克之间的碰撞并处理。
 static void CollisionCheckWithLists(Container* bullets, Container* tanks);
 // 判断子弹与中立坦克(墙体/据点)之间的碰撞并处理。
@@ -103,11 +105,16 @@ void InitializeGame()
 {
 	if (!m_valid_) {
 		int i;
+		m_success_ = FALSE;
+		m_falied_ = FALSE;
 		--m_wave_;
+		m_special_wave_ = FALSE;
+		m_special_wave_end_ = FALSE;
 		m_adjustTime_ = V6_ADJUST_TIME;
 		m_time_ = V6_GAME_TIME;
 		m_score_ = 0;	
-		memcpy(m_waveData_, g_waveData_[g_gameDifficulty_], sizeof(TankWave) * V6_GAME_MAX_WAVE);
+		m_playingAnimation_ = FALSE;
+		memcpy(m_waveData_, g_waveData_[g_gameDifficulty_], sizeof(TankWave) * (V6_GAME_MAX_WAVE + 1));
 		for (i = 1; i <= m_wave_; ++i) {
 			if (m_waveData_[i].OnStart != NULL) m_waveData_[i].OnStart();
 			memset(&(m_waveData_[i]), 0, sizeof(TankWave));
@@ -157,13 +164,14 @@ void LoadMap() {
 	SetWall(480, 700);
 }
 void InitializeGameField() {
-	LoadMap();
-
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, 320, 700, 80, 80, RenderSimple, &g_img_castle);
 	AddElement(g_logicSpriteManager_, ls);
 	Tank* t = CreateStronghold(ls);
 	t->Dead = TankDeadFatal;
+	m_stronghold_ = t;
 	AddElement(m_neutralTankList_, t);
+
+	LoadMap();
 
 	ls = CreateLogicSprite(NULL, PlayerTankRotate, 80, 700, 80, 80, RenderWithRotation, &g_img_bigTank, &g_img_bigTankMsk);
 	AddElement(g_logicSpriteManager_, ls);
@@ -173,7 +181,6 @@ void InitializeGameField() {
 	t->Dead = TankDeadFatal;
 	m_playerTank_ = t;
 	AddElement(m_playerTankList_, t);
-	m_stronghold_ = t;
 	ls = CreateLogicSprite(NULL, PlayerBatterySync, 160, 700, 80, 80, RenderWithRotation, &g_img_bigTankBattery, &g_img_bigTankBatteryMsk);
 	AddElement(g_logicSpriteManager_, ls);
 
@@ -203,8 +210,9 @@ void LoadGameFromFile(LPCSTR file)
 	m_valid_ = TRUE;
 }
 
-void GameOver()
+void GameOver(BOOLean success)
 {
+	ClearContainer(m_triggerList_);
 	ClearContainer(m_respawn_);
 	ClearContainer(m_playerItemList_);
 	ClearContainer(m_neutralTankList_);
@@ -213,7 +221,12 @@ void GameOver()
 	ClearContainer(m_playerBulletList_);
 	ClearContainer(m_playerTankList_);
 	m_valid_ = FALSE;
-	LoadScene(SCENE_GAMEOVER);
+	if (!success) {
+		LoadScene(SCENE_GAMEOVER);
+	}
+	else {
+
+	}
 }
 
 LogicStep* g_stepGameUpdate_;
@@ -222,12 +235,15 @@ void StepGameUpdate(int t, LogicStep* tis){
 		m_pause_ = !m_pause_;
 	}
 	if (!m_pause_) {
-		StepCheckEvent(t);
-		StepTankStateUpdate(t);
-		StepTankDecide();
-		StepTankAct(t);
-		StepBulletAct(t);
-		StepCheckCollision();
+		if (!m_playingAnimation_) {
+			StepCheckEvent(t);
+			StepTankStateUpdate(t);
+			StepTankDecide();
+			StepTankAct(t);
+			StepBulletAct(t);
+			StepCheckCollision();
+		}
+		StepRunTrigger(t);
 		StepCheckValid();
 	}
 }
@@ -237,19 +253,31 @@ void StepCheckEvent(int ti) {
 	m_time_ -= ti;
 	if (m_time_ <= 0) GameOver();
 
+	// 新的回合到来倒计时。
 	if (m_adjustTime_ > ti) {
 		m_adjustTime_ -= ti;
 	}
+	// 新的回合到来。
 	else if (m_adjustTime_ != 0) {
 		++m_wave_;
 		if (m_waveData_[m_wave_].OnStart != NULL) m_waveData_[m_wave_].OnStart();
 		m_adjustTime_ = 0;
 		m_generateCD_ = 0;
 	}
+	else if (m_special_wave_) {
+		if (m_special_wave_end_) {
+			if (m_waveData_[m_wave_].OnClear != NULL) m_waveData_[m_wave_].OnClear(m_enemyLatestX, m_enemyLatestY);
+			m_adjustTime_ = V6_ADJUST_TIME;
+			m_special_wave_ = FALSE;
+			m_special_wave_end_ = FALSE;
+		}
+	}
+	// 开始新的回合到来倒计时。
 	else if (m_waveData_[m_wave_].m_tank_total_count_ == 0 & m_enemyTankList_->m_count_ == 0) {
 		if(m_waveData_[m_wave_].OnClear != NULL) m_waveData_[m_wave_].OnClear(m_enemyLatestX, m_enemyLatestY);
 		m_adjustTime_ = V6_ADJUST_TIME;
 	}
+	// 产生新的敌人。
 	else {
 		m_generateCD_ -= ti;
 		if (m_generateCD_ <= 0) {
@@ -303,15 +331,15 @@ void StepBulletAct(int ti) {
 		b = (Bullet*)(m_playerBulletList_->m_me_[i]);
 		if (!b->m_valid_) continue;
 		b->Update(ti, b);
-		if (b->m_super_->m_x_ + b->m_super_->m_w_ < V6_GAMEFIELD_LEFT | b->m_super_->m_x_ > V6_GAMEFIELD_LEFT + V6_GAMEFIELD_WIDTH |
-			b->m_super_->m_y_ + b->m_super_->m_h_ < V6_GAMEFIELD_TOP | b->m_super_->m_y_ > V6_GAMEFIELD_TOP + V6_GAMEFIELD_HEIGHT) b->m_valid_ = FALSE;
+		if (b->m_super_->m_x_ + b->m_super_->m_w_ < V6_GAMEFIELD_LEFT + b->m_validXMin_ | b->m_super_->m_x_ > V6_GAMEFIELD_LEFT + b->m_validXMax_ |
+			b->m_super_->m_y_ + b->m_super_->m_h_ < V6_GAMEFIELD_TOP + b->m_validYMin_ | b->m_super_->m_y_ > V6_GAMEFIELD_TOP + b->m_validYMax_) b->m_valid_ = FALSE;
 	}
 	for (i = 0; i < m_enemyBulletList_->m_count_; ++i) {
 		b = (Bullet*)(m_enemyBulletList_->m_me_[i]);
 		if (!b->m_valid_) continue;
 		b->Update(ti, b);
-		if (b->m_super_->m_x_ + b->m_super_->m_w_ < V6_GAMEFIELD_LEFT | b->m_super_->m_x_ > V6_GAMEFIELD_LEFT + V6_GAMEFIELD_WIDTH |
-			b->m_super_->m_y_ + b->m_super_->m_h_ < V6_GAMEFIELD_TOP | b->m_super_->m_y_ > V6_GAMEFIELD_TOP + V6_GAMEFIELD_HEIGHT) b->m_valid_ = FALSE;
+		if (b->m_super_->m_x_ + b->m_super_->m_w_ < V6_GAMEFIELD_LEFT + b->m_validXMin_ | b->m_super_->m_x_ > V6_GAMEFIELD_LEFT + b->m_validXMax_ |
+			b->m_super_->m_y_ + b->m_super_->m_h_ < V6_GAMEFIELD_TOP + b->m_validYMin_ | b->m_super_->m_y_ > V6_GAMEFIELD_TOP + b->m_validYMax_) b->m_valid_ = FALSE;
 	}
 }
 void StepCheckCollision() {
@@ -347,7 +375,8 @@ void CollisionCheckWithLists(Container* bullets, Container* tanks) {
 				b->m_super_->m_x_ + b->m_super_->m_w_ / 2, b->m_super_->m_y_ + b->m_super_->m_h_ / 2, b->m_super_->m_w_ / 2)) {
 				t->m_HP -= b->m_atk_;
 				if (t->m_HP <= 0) {
-					if(b->m_sender_ == m_playerTank_) m_score_ += t->m_data_.m_score_;
+					//if(b->m_sender_ == m_playerTank_) 
+					m_score_ += t->m_data_.m_score_;
 					m_enemyLatestX = t->m_super_->m_x_;
 					m_enemyLatestY = t->m_super_->m_y_;
 					t->m_valid_ = FALSE;
@@ -385,60 +414,90 @@ void CollisionCheckWithWallList(Container * bullets, Container * tanks)
 		}
 	}
 }
-void StepCheckValid() {
+void StepRunTrigger(int t) {
 	int i;
-	Bullet* b;
-	Tank* tk;
-	Item* it;
-	for (i = 0; i < m_playerTankList_->m_count_; ++i) {
-		tk = (Tank*)m_playerTankList_->m_me_[i];
-		if (!tk->m_valid_) {
-			if (tk->m_extra_ != NULL) free(tk->m_extra_);
-			RemoveElement(g_logicSpriteManager_, tk->m_super_);
-			RemoveElement(m_playerTankList_, tk);
-			--i;
+	Trigger* tr;
+	for (i = 0; i < m_triggerList_->m_count_; ++i) {
+		tr = (Trigger*)m_triggerList_->m_me_[i];
+		if (tr->Check(tr, t)) {
+			tr->Act(tr, t);
+			if (tr->m_trigger_max_times_ != V6_TRIGGER_INFINITE) {
+				if (tr->m_trigger_max_times_ < 2) tr->m_valid_ = FALSE;
+				--tr->m_trigger_max_times_;
+			}
 		}
 	}
-	for (i = 0; i < m_enemyTankList_->m_count_; ++i) {
-		tk = (Tank*)m_enemyTankList_->m_me_[i];
-		if (!tk->m_valid_) {
-			if (tk->m_extra_ != NULL) free(tk->m_extra_);
-			RemoveElement(g_logicSpriteManager_, tk->m_super_);
-			RemoveElement(m_enemyTankList_, tk);
-			--i;
-		}
+}
+void StepCheckValid() {
+	if (m_success_) {
+		GameOver(V6_GAMEOVER_SUCCESS);
 	}
-	for (i = 0; i < m_neutralTankList_->m_count_; ++i) {
-		tk = (Tank*)m_neutralTankList_->m_me_[i];
-		if (!tk->m_valid_) {
-			if (tk->m_extra_ != NULL) free(tk->m_extra_);
-			RemoveElement(g_logicSpriteManager_, tk->m_super_);
-			RemoveElement(m_neutralTankList_, tk);
-			--i;
-		}
+	else if (m_falied_) {
+		GameOver();
 	}
-	for (i = 0; i < m_playerBulletList_->m_count_; ++i) {
-		b = (Bullet*)m_playerBulletList_->m_me_[i];
-		if (!b->m_valid_) {
-			RemoveElement(g_logicSpriteManager_, b->m_super_);
-			RemoveElement(m_playerBulletList_, b);
-			--i;
+	else {
+		int i;
+		Bullet* b;
+		Tank* tk;
+		Item* it;
+		Trigger* t;
+		for (i = 0; i < m_playerTankList_->m_count_; ++i) {
+			tk = (Tank*)m_playerTankList_->m_me_[i];
+			if (!tk->m_valid_) {
+				if (tk->m_extra_ != NULL) free(tk->m_extra_);
+				RemoveElement(g_logicSpriteManager_, tk->m_super_);
+				RemoveElement(m_playerTankList_, tk);
+				--i;
+			}
 		}
-	}
-	for (i = 0; i < m_enemyBulletList_->m_count_; ++i) {
-		b = (Bullet*)m_enemyBulletList_->m_me_[i];
-		if (!b->m_valid_) {
-			RemoveElement(g_logicSpriteManager_, b->m_super_);
-			RemoveElement(m_enemyBulletList_, b);
-			--i;
+		for (i = 0; i < m_enemyTankList_->m_count_; ++i) {
+			tk = (Tank*)m_enemyTankList_->m_me_[i];
+			if (!tk->m_valid_) {
+				if (tk->m_extra_ != NULL) free(tk->m_extra_);
+				RemoveElement(g_logicSpriteManager_, tk->m_super_);
+				RemoveElement(m_enemyTankList_, tk);
+				--i;
+			}
 		}
-	}
-	for (i = 0; i < m_playerItemList_->m_count_; ++i) {
-		it = (Item*)m_playerItemList_->m_me_[i];
-		if (!it->m_valid_) {
-			RemoveElement(g_logicSpriteManager_, it->m_super_);
-			RemoveElement(m_playerItemList_, it);
-			--i;
+		for (i = 0; i < m_neutralTankList_->m_count_; ++i) {
+			tk = (Tank*)m_neutralTankList_->m_me_[i];
+			if (!tk->m_valid_) {
+				if (tk->m_extra_ != NULL) free(tk->m_extra_);
+				RemoveElement(g_logicSpriteManager_, tk->m_super_);
+				RemoveElement(m_neutralTankList_, tk);
+				--i;
+			}
+		}
+		for (i = 0; i < m_playerBulletList_->m_count_; ++i) {
+			b = (Bullet*)m_playerBulletList_->m_me_[i];
+			if (!b->m_valid_) {
+				RemoveElement(g_logicSpriteManager_, b->m_super_);
+				RemoveElement(m_playerBulletList_, b);
+				--i;
+			}
+		}
+		for (i = 0; i < m_enemyBulletList_->m_count_; ++i) {
+			b = (Bullet*)m_enemyBulletList_->m_me_[i];
+			if (!b->m_valid_) {
+				RemoveElement(g_logicSpriteManager_, b->m_super_);
+				RemoveElement(m_enemyBulletList_, b);
+				--i;
+			}
+		}
+		for (i = 0; i < m_playerItemList_->m_count_; ++i) {
+			it = (Item*)m_playerItemList_->m_me_[i];
+			if (!it->m_valid_) {
+				RemoveElement(g_logicSpriteManager_, it->m_super_);
+				RemoveElement(m_playerItemList_, it);
+				--i;
+			}
+		}
+		for (i = 0; i < m_triggerList_->m_count_; ++i) {
+			t = (Trigger*)m_triggerList_->m_me_[i];
+			if (!t->m_valid_) {
+				RemoveElement(m_triggerList_, t);
+				--i;
+			}
 		}
 	}
 }
@@ -447,8 +506,10 @@ void GenerateNewAt(Respawn * t)
 {
 	int i, j;
 	if (m_waveData_[m_wave_].m_tank_total_count_ == 0) return;
-	if (!CheckPointLegal(t->m_super_->m_x_, t->m_super_->m_y_, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_playerTankList_)) return;
-	if (!CheckPointLegal(t->m_super_->m_x_, t->m_super_->m_y_, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_enemyTankList_)) return;
+	if (CheckRectWithTankList(t->m_super_->m_x_, t->m_super_->m_y_, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_playerTankList_)
+		!= NULL) return;
+	if (CheckRectWithTankList(t->m_super_->m_x_, t->m_super_->m_y_, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_enemyTankList_)
+		!= NULL) return;
 	i = NextRand() % m_waveData_[m_wave_].m_tank_total_count_;
 	for (j = 1; j < V6_TANKSTYLE_COUNT; ++j) {
 		if (m_waveData_[m_wave_].m_tank_num_[j] == 0) continue;
@@ -536,7 +597,7 @@ void SetNewPrismTank(int x, int y)
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_prismTank, g_img_prismTankMsk);
 	Tank* t = CreatePrismTank(ls);
-	t->m_shoot_angle_ = (double)(NextRand()) / V6_RAND_MAX * V6_PI * 2;
+	t->m_shoot_angle_ = (double)(NextRand()) / V6_RAND_MAX_F * V6_PI * 2;
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
@@ -586,10 +647,6 @@ void SetNewAttackTank(int x, int y)
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
 }
-void BossCome(int x, int y)
-{
-
-}
 void GenerateItem(int x, int y, ITEMSTYLE is)
 {
 	LogicSprite* ls = CreateItem(x, y, is);
@@ -605,21 +662,24 @@ void PlayerInput(Tank* tis) {
 	if (g_keyboardState_.shoot_down) tis->m_shoot_ = true; else tis->m_shoot_ = false;
 	PlayerTank* t = (PlayerTank*)tis->m_extra_;
 	if (g_keyboardState_.slow_down) t->m_slow_ = true; else t->m_slow_ = false;
-	if (g_keyboardState_.set_wall_down) t->m_setWall_ = true; else t->m_setWall_ = false;
+	if (g_keyboardState_.set_wall_up) 
+		t->m_setWall_ = true;
+	else
+		t->m_setWall_ = false;
 	tis->m_shoot_angle_ = CalAngle(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - 5, tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - 10,
 		g_mouseState_.x, g_mouseState_.y);
 }
 
-BOOLean CheckPointLegal(int x, int y, int w, int h, Container * c)
+Tank * CheckRectWithTankList(int x, int y, int w, int h, Container * c)
 {
 	Tank* t;
 	int i;
 	for (i = 0; i < c->m_count_; ++i) {
 		t = (Tank*)c->m_me_[i];
-		if (CollisionDetection(x, y, w, h, 
-			t->m_super_->m_x_ + t->m_collideL, t->m_super_->m_y_ + t->m_collideT, t->m_collideW, t->m_collideH)) return FALSE;
+		if (CollisionDetection(x, y, w, h,
+			t->m_super_->m_x_ + t->m_collideL, t->m_super_->m_y_ + t->m_collideT, t->m_collideW, t->m_collideH)) return t;
 	}
-	return TRUE;
+	return NULL;
 }
 static PlayerTank* ex;
 static LogicSprite* bc;
@@ -671,29 +731,36 @@ void PlayerAct(int t, Tank* tis) {
 	PlayerShootAct(tis);
 
 	if (ex->m_setWall_ == TRUE & ex->m_wall_count_ > 0) {
-		int i = round(tis->m_shoot_angle_ / V6_DRT_UP), ddx = bc->m_x_ + tis->m_collideL, ddy = bc->m_y_ + tis->m_collideT;
+		int i = round(tis->m_shoot_angle_ / V6_DRT_UP), ddx, ddy;
 		switch (i) {
 		case 0:
 		case 4:
-			ddx += tis->m_collideW + 10;
+			ddx = ceil((bc->m_x_ + tis->m_collideL + tis->m_collideW) / V6_TANK_HALF_EDGE_LENGTH / 2.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
+			ddy = round((bc->m_y_ + tis->m_collideT) / V6_TANK_HALF_EDGE_LENGTH / 2.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
 			break;
 		case 1:
-			ddy -= V6_TANK_HALF_EDGE_LENGTH * 2 + 10;
+			ddy = floor((bc->m_y_ + tis->m_collideT) / V6_TANK_HALF_EDGE_LENGTH / 2.0 - 1.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
+			ddx = round((bc->m_x_ + tis->m_collideL) / V6_TANK_HALF_EDGE_LENGTH / 2.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
 			break;
 		case 2:
-			ddx -= V6_TANK_HALF_EDGE_LENGTH * 2 + 10;
+			ddx = floor((bc->m_x_ + tis->m_collideL) / V6_TANK_HALF_EDGE_LENGTH / 2.0 - 1.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
+			ddy = round((bc->m_y_ + tis->m_collideT) / V6_TANK_HALF_EDGE_LENGTH / 2.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
 			break;
 		case 3:
-			ddy += tis->m_collideH + 10;
+			ddy = ceil((bc->m_y_ + tis->m_collideT + tis->m_collideH) / V6_TANK_HALF_EDGE_LENGTH / 2.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
+			ddx = round((bc->m_x_ + tis->m_collideL) / V6_TANK_HALF_EDGE_LENGTH / 2.0) * V6_TANK_HALF_EDGE_LENGTH * 2;
 			break;
 		}
-		if (CheckPointLegal(ddx, ddy, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_enemyTankList_) &
-			CheckPointLegal(ddx, ddy, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_neutralTankList_) &
-			CheckPointLegal(ddx, ddy, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_respawn_) & 
-			ddx >= 0 & ddy >= 0 & ddx + V6_TANK_HALF_EDGE_LENGTH * 2 <= V6_GAMEFIELD_WIDTH & 
-			ddy + V6_TANK_HALF_EDGE_LENGTH * 2 <= V6_GAMEFIELD_HEIGHT) {
+		Tank* tk = CheckRectWithTankList(ddx + 1, ddy + 1, V6_TANK_HALF_EDGE_LENGTH * 2 - 2, V6_TANK_HALF_EDGE_LENGTH * 2 - 2, m_neutralTankList_);
+		if (tk != NULL) {
+			tk->m_HP += 800;
 			--ex->m_wall_count_;
+		}
+		else if (CheckRectWithTankList(ddx, ddy, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, m_enemyTankList_) == NULL &
+			ddx >= 0 & ddy >= 0 & ddx + V6_TANK_HALF_EDGE_LENGTH * 2 <= V6_GAMEFIELD_WIDTH &
+			ddy + V6_TANK_HALF_EDGE_LENGTH * 2 <= V6_GAMEFIELD_HEIGHT) {
 			SetWall(ddx, ddy);
+			--ex->m_wall_count_;
 		}
 	}
 }
@@ -736,7 +803,7 @@ void AlignToBarriers(Tank* t, double xnew, double ynew) {
 
 void TankDeadFatal(Tank * t)
 {
-	GameOver();
+	m_falied_ = TRUE;
 }
 
 void PlayerTankRotate(int t, LogicSprite * ls)
@@ -796,14 +863,18 @@ void RenderWithDirection(int ti, LogicSprite * ls)
 void WallRender(int t, LogicSprite * ls)
 {
 	Tank* tk = (Tank*)ls->m_me_;
-	if (tk->m_HP < tk->m_data_.m_HPmax_ / 4) 
+	if (tk->m_HP <= 600) 
 		ls->m_body_->m_image_ = &g_img_wallWorn3;
-	else if (tk->m_HP < tk->m_data_.m_HPmax_ / 2)
+	else if (tk->m_HP <= 1200)
 		ls->m_body_->m_image_ = &g_img_wallWorn2;
-	else if (tk->m_HP < tk->m_data_.m_HPmax_ * 3 / 4)
+	else if (tk->m_HP <= 1800)
 		ls->m_body_->m_image_ = &g_img_wallWorn1;
-	else
+	else if (tk->m_HP <= 3200)
 		ls->m_body_->m_image_ = &g_img_wallWorn0;
+	else if (tk->m_HP <= 6400)
+		ls->m_body_->m_image_ = &g_img_wailingWall1;
+	else
+		ls->m_body_->m_image_ = &g_img_wailingWall2;
 }
 
 static RECT tr;
@@ -864,10 +935,16 @@ void RenderTimeLeft(LogicSprite * ls)
 
 GAME_DIFFICULTY g_gameDifficulty_;
 
+BOOLean m_success_;
+BOOLean m_falied_; 
+BOOLean m_special_wave_;
+BOOLean m_special_wave_end_;
 int m_wave_;
 int m_time_;
 int m_score_;
 int m_activeRespawn_;
+
+BOOLean m_playingAnimation_;
 
 Tank* m_playerTank_;
 Tank* m_stronghold_;
@@ -879,3 +956,4 @@ Container* m_enemyBulletList_ = CreateContainer(sizeof(Bullet), TRUE);
 Container* m_neutralTankList_ = CreateContainer(sizeof(Tank), TRUE);
 Container* m_playerItemList_ = CreateContainer(sizeof(Item), TRUE);
 Container* m_respawn_ = CreateContainer(sizeof(Tank), TRUE);
+Container* m_triggerList_ = CreateContainer(sizeof(Trigger), TRUE);

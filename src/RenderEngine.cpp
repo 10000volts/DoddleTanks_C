@@ -16,6 +16,7 @@ void InitializeRenderEnv()
 RenderSprite * CreateRenderSprite(IMAGE * image, IMAGE * mask, void(*render)(LogicSprite* e))
 {
 	RenderSprite* r = (RenderSprite*)malloc(sizeof(RenderSprite));
+	memset(r, 0, sizeof(RenderSprite));
 	r->m_image_ = image;
 	r->m_src_image_ = image;
 	r->m_mask_ = mask;

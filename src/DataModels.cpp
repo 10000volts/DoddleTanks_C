@@ -1,6 +1,7 @@
 #include <string.h>
 #include "Game.h"
 #include "Tank.h"
+#include "BossTankAction.h"
 
 static void SetActiveRespawns1();
 static void SetActiveRespawns3();
@@ -13,7 +14,7 @@ static void GenerateItemHeartAndGWC3(int x, int y);
 static void GenerateItemHeartAndGWC4(int x, int y);
 static void GenerateItemHeartAndGWC5(int x, int y);
 
-static void FillTankDatum(TankData* td, int HPmax, int shootInterval, int bulletSpeed, int atk, int speed, int score, double ratio = 1.0, int exd = 0) {
+static void FillTankDatum(TankData* td, int HPmax, int shootInterval, double bulletSpeed, int atk, int speed, int score, double ratio = 1.0, int exd = 0) {
 	td->m_HPmax_ = HPmax;
 	td->m_atk_ = atk;
 	td->m_shootInterval_ = shootInterval;
@@ -34,36 +35,36 @@ static void FillTankData() {
 	FillTankDatum(&g_junkTankData_[2], 300, 400, 640, 100, 300, 200);
 
 	FillTankDatum(&g_bigTankData_[0], 600, 1500, 200, 100, 100, 200);
-	FillTankDatum(&g_bigTankData_[1], 750, 1200, 280, 140, 120, 300);
-	FillTankDatum(&g_bigTankData_[2], 900, 1000, 320, 180, 150, 400);
+	FillTankDatum(&g_bigTankData_[1], 750, 1200, 280, 125, 120, 300);
+	FillTankDatum(&g_bigTankData_[2], 900, 1000, 320, 150, 150, 400);
 
 	FillTankDatum(&g_prismTankData_[0], 400, 800, 280, 70, 350, 300);
 	FillTankDatum(&g_prismTankData_[1], 500, 800, 300, 90, 400, 450);
-	FillTankDatum(&g_prismTankData_[2], 700, 700, 350, 120, 520, 600);
+	FillTankDatum(&g_prismTankData_[2], 700, 700, 350, 110, 520, 600);
 
-	FillTankDatum(&g_fiveTankData_[0], 800, 1200, 400, 80, 180, 400, 0.25);
-	FillTankDatum(&g_fiveTankData_[1], 1000, 1200, 450, 100, 220, 600, 0.25);
-	FillTankDatum(&g_fiveTankData_[2], 1300, 1000, 500, 110, 250, 800, 0.25);
+	FillTankDatum(&g_fiveTankData_[0], 800, 1400, 400, 70, 180, 480, 0.2);
+	FillTankDatum(&g_fiveTankData_[1], 1000, 1200, 450, 90, 220, 720, 0.2);
+	FillTankDatum(&g_fiveTankData_[2], 1200, 1000, 500, 100, 250, 960, 0.15);
 
-	FillTankDatum(&g_quickTankData_[0], 400, 500, 150, 70, 400, 480, 1.0, 300);
-	FillTankDatum(&g_quickTankData_[1], 600, 400, 180, 80, 450, 720, 1.0, 320);
-	FillTankDatum(&g_quickTankData_[2], 800, 250, 180, 90, 520, 960, 1.0, 370);
+	FillTankDatum(&g_quickTankData_[0], 600, 700, 70, 70, 400, 400, 1.0, 50);
+	FillTankDatum(&g_quickTankData_[1], 800, 400, 70, 90, 450, 600, 1.0, 50);
+	FillTankDatum(&g_quickTankData_[2], 1000, 350, 70, 100, 520, 800, 1.0, 50);
 
 	FillTankDatum(&g_lanlingkingTankData_[0], 500, 2000, 450, 60, 200, 300);
 	FillTankDatum(&g_lanlingkingTankData_[1], 600, 1800, 500, 80, 250, 450);
 	FillTankDatum(&g_lanlingkingTankData_[2], 650, 1500, 550, 100, 300, 600);
 
-	FillTankDatum(&g_attackTankData_[0], 700, 1800, 200, 100, 100, 480);
-	FillTankDatum(&g_attackTankData_[1], 900, 1400, 240, 120, 100, 720);
-	FillTankDatum(&g_attackTankData_[2], 1100, 1200, 280, 140, 120, 960);
+	FillTankDatum(&g_attackTankData_[0], 800, 1800, 100, 100, 100, 400);
+	FillTankDatum(&g_attackTankData_[1], 1000, 1400, 110, 120, 100, 600);
+	FillTankDatum(&g_attackTankData_[2], 1300, 1200, 120, 130, 120, 800);
 
-	FillTankDatum(&g_sunTankData_[0], 1000, 3000, 180, 160, 200, 400);
-	FillTankDatum(&g_sunTankData_[1], 1250, 2500, 200, 190, 200, 600);
-	FillTankDatum(&g_sunTankData_[2], 1500, 2000, 250, 220, 200, 800);
+	FillTankDatum(&g_sunTankData_[0], 1000, 3000, 180, 110, 200, 480);
+	FillTankDatum(&g_sunTankData_[1], 1250, 2500, 200, 140, 200, 720);
+	FillTankDatum(&g_sunTankData_[2], 1500, 2000, 250, 160, 200, 960);
 
-	FillTankDatum(&g_bossTankData_[0], 60000, 0, 0, 120, 150, 10000, 0.25, 0);
-	FillTankDatum(&g_bossTankData_[1], 80000, 0, 0, 140, 150, 20000, 0.25, 1);
-	FillTankDatum(&g_bossTankData_[2], 100000, 0, 0, 180, 150, 40000, 0.25, 2);
+	FillTankDatum(&g_bossTankData_[0], 60000, 0, 0, 60, 150, 50000, 0.25, 0);
+	FillTankDatum(&g_bossTankData_[1], 80000, 0, 0, 70, 150, 100000, 0.25, 1);
+	FillTankDatum(&g_bossTankData_[2], 100000, 0, 0, 80, 150, 150000, 0.25, 2);
 }
 
 static void FillWaveDatum(TankWave * tw, int wdata[V6_TANKSTYLE_COUNT]) {
@@ -130,16 +131,19 @@ static void FillWaveData() {
 	wd[TANK_BIG] = 2;
 	wd[TANK_PRISM] = 2;
 	FillWaveDatum(&g_waveData_[0][4], wd);
+	g_waveData_[0][4].OnClear = GenerateItemHeartAndGWC5;
 	ClearWD(wd);
-	wd[TANK_JUNK] = 7;
+	wd[TANK_JUNK] = 6;
 	wd[TANK_BIG] = 3;
 	wd[TANK_PRISM] = 5;
 	FillWaveDatum(&g_waveData_[1][4], wd);
+	g_waveData_[1][4].OnClear = GenerateItemHeartAndGWC4;
 	ClearWD(wd);
-	wd[TANK_JUNK] = 7;
+	wd[TANK_JUNK] = 6;
 	wd[TANK_BIG] = 3;
 	wd[TANK_PRISM] = 6;
 	FillWaveDatum(&g_waveData_[2][4], wd);
+	g_waveData_[2][4].OnClear = GenerateItemHeartAndGWC4;
 	
 	ClearWD(wd);
 	wd[TANK_JUNK] = 4;
@@ -272,16 +276,19 @@ static void FillWaveData() {
 	wd[TANK_PRISM] = 4;
 	wd[TANK_FIVE] = 2;
 	FillWaveDatum(&g_waveData_[0][14], wd);
+	g_waveData_[0][14].OnClear = GenerateItemHeartAndGWC5;
 	ClearWD(wd);
 	wd[TANK_QUICK] = 6;
 	wd[TANK_PRISM] = 4;
 	wd[TANK_FIVE] = 2;
 	FillWaveDatum(&g_waveData_[1][14], wd);
+	g_waveData_[1][14].OnClear = GenerateItemHeartAndGWC4;
 	ClearWD(wd);
 	wd[TANK_QUICK] = 6;
 	wd[TANK_PRISM] = 4;
 	wd[TANK_FIVE] = 4;
 	FillWaveDatum(&g_waveData_[2][14], wd);
+	g_waveData_[2][14].OnClear = GenerateItemHeartAndGWC4;
 
 	ClearWD(wd);
 	wd[TANK_PRISM] = 10;
@@ -311,17 +318,17 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[2][16], wd);
 
 	ClearWD(wd);
-	wd[TANK_JUNK] = 6;
+	wd[TANK_JUNK] = 5;
 	wd[TANK_PRISM] = 6;
 	wd[TANK_QUICK] = 6;
 	FillWaveDatum(&g_waveData_[0][17], wd);
 	ClearWD(wd);
-	wd[TANK_JUNK] = 7;
+	wd[TANK_JUNK] = 6;
 	wd[TANK_PRISM] = 7;
 	wd[TANK_QUICK] = 6;
 	FillWaveDatum(&g_waveData_[1][17], wd);
 	ClearWD(wd);
-	wd[TANK_JUNK] = 8;
+	wd[TANK_JUNK] = 6;
 	wd[TANK_PRISM] = 8;
 	wd[TANK_QUICK] = 6;
 	FillWaveDatum(&g_waveData_[2][17], wd);
@@ -348,7 +355,7 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[0][19], wd);
 	g_waveData_[0][19].OnClear = GenerateItemHeartAndGWC5;
 	ClearWD(wd);
-	wd[TANK_JUNK] = 6;
+	wd[TANK_JUNK] = 4;
 	wd[TANK_BIG] = 2;
 	wd[TANK_QUICK] = 2;
 	wd[TANK_FIVE] = 4;
@@ -356,7 +363,7 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[1][19], wd);
 	g_waveData_[1][19].OnClear = GenerateItemHeartAndGWC4;
 	ClearWD(wd);
-	wd[TANK_JUNK] = 6;
+	wd[TANK_JUNK] = 4;
 	wd[TANK_QUICK] = 4;
 	wd[TANK_FIVE] = 5;
 	wd[TANK_ATTACK] = 4;
@@ -367,7 +374,7 @@ static void FillWaveData() {
 	wd[TANK_ATTACK] = 10;
 	FillWaveDatum(&g_waveData_[0][20], wd);
 	ClearWD(wd);
-	wd[TANK_ATTACK] = 12;
+	wd[TANK_ATTACK] = 11;
 	FillWaveDatum(&g_waveData_[1][20], wd);
 	g_waveData_[1][20].OnStart = SetActiveRespawns6;
 	ClearWD(wd);
@@ -375,19 +382,19 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[2][20], wd);
 
 	ClearWD(wd);
-	wd[TANK_FIVE] = 6;
+	wd[TANK_FIVE] = 5;
 	wd[TANK_LANLINGKING] = 4;
-	wd[TANK_ATTACK] = 6;
+	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[0][21], wd);
 	ClearWD(wd);
-	wd[TANK_FIVE] = 6;
-	wd[TANK_LANLINGKING] = 4;
-	wd[TANK_ATTACK] = 6;
+	wd[TANK_FIVE] = 5;
+	wd[TANK_LANLINGKING] = 5;
+	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[1][21], wd);
 	ClearWD(wd);
-	wd[TANK_FIVE] = 6;
-	wd[TANK_LANLINGKING] = 4;
-	wd[TANK_ATTACK] = 6;
+	wd[TANK_FIVE] = 5;
+	wd[TANK_LANLINGKING] = 6;
+	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[2][21], wd);
 
 	ClearWD(wd);
@@ -415,28 +422,31 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[0][23], wd);
 	ClearWD(wd);
 	wd[TANK_PRISM] = 4;
-	wd[TANK_FIVE] = 3;
-	wd[TANK_SUN] = 3;
+	wd[TANK_FIVE] = 2;
+	wd[TANK_SUN] = 2;
 	wd[TANK_LANLINGKING] = 2;
 	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[1][23], wd);
 	ClearWD(wd);
 	wd[TANK_PRISM] = 4;
-	wd[TANK_FIVE] = 3;
-	wd[TANK_SUN] = 3;
+	wd[TANK_FIVE] = 2;
+	wd[TANK_SUN] = 2;
 	wd[TANK_LANLINGKING] = 3;
 	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[2][23], wd);
 
 	ClearWD(wd);
-	wd[TANK_QUICK] = 10;
+	wd[TANK_SUN] = 10;
 	FillWaveDatum(&g_waveData_[0][24], wd);
+	g_waveData_[0][24].OnClear = GenerateItemHeartAndGWC5;
 	ClearWD(wd);
-	wd[TANK_QUICK] = 11;
+	wd[TANK_SUN] = 10;
 	FillWaveDatum(&g_waveData_[1][24], wd);
+	g_waveData_[1][24].OnClear = GenerateItemHeartAndGWC4;
 	ClearWD(wd);
-	wd[TANK_QUICK] = 12;
+	wd[TANK_SUN] = 10;
 	FillWaveDatum(&g_waveData_[2][24], wd);
+	g_waveData_[2][24].OnClear = GenerateItemHeartAndGWC4;
 
 	ClearWD(wd);
 	wd[TANK_PRISM] = 15;
@@ -463,23 +473,23 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[2][26], wd);
 
 	ClearWD(wd);
-	wd[TANK_SUN] = 10;
+	wd[TANK_QUICK] = 10;
 	FillWaveDatum(&g_waveData_[0][27], wd);
 	ClearWD(wd);
-	wd[TANK_SUN] = 10;
+	wd[TANK_QUICK] = 11;
 	FillWaveDatum(&g_waveData_[1][27], wd);
 	ClearWD(wd);
-	wd[TANK_SUN] = 10;
+	wd[TANK_QUICK] = 12;
 	FillWaveDatum(&g_waveData_[2][27], wd);
 
 	ClearWD(wd);
-	wd[TANK_ATTACK] = 10;
+	wd[TANK_ATTACK] = 11;
 	FillWaveDatum(&g_waveData_[0][28], wd);
 	ClearWD(wd);
-	wd[TANK_ATTACK] = 11;
+	wd[TANK_ATTACK] = 12;
 	FillWaveDatum(&g_waveData_[1][28], wd);
 	ClearWD(wd);
-	wd[TANK_ATTACK] = 12;
+	wd[TANK_ATTACK] = 14;
 	FillWaveDatum(&g_waveData_[2][28], wd);
 
 	ClearWD(wd);
@@ -515,6 +525,16 @@ static void FillWaveData() {
 	wd[TANK_ATTACK] = 2;
 	FillWaveDatum(&g_waveData_[2][29], wd);
 	g_waveData_[2][29].OnClear = GenerateItemHeartAndGWC4;
+
+	ClearWD(wd);
+	FillWaveDatum(&g_waveData_[0][30], wd);
+	g_waveData_[0][30].OnStart = BossCome;
+	ClearWD(wd);
+	FillWaveDatum(&g_waveData_[1][30], wd);
+	g_waveData_[1][30].OnStart = BossCome;
+	ClearWD(wd);
+	FillWaveDatum(&g_waveData_[2][30], wd);
+	g_waveData_[2][30].OnStart = BossCome;
 }
 
 void FillData()

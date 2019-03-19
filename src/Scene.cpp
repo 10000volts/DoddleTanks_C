@@ -10,6 +10,7 @@ static void LoadGameScene();
 static void LoadDifficultyChooseScene();
 static void LoadWaveChooseScene();
 static void LoadGameOverScene();
+static void LoadStageClearScene();
 static void ButtonClickLoadMain(Button* tis);
 static void ButtonClickExit(Button* tis);
 static void ButtonClickLoadGame(Button* tis);
@@ -28,7 +29,6 @@ LogicStep* g_stepWaveChange_;
 void LoadScene(Scene sc) {
 	ClearButtons();
 	UnloadLogicEngine();
-	ClearContainer(g_extraContainer);
 	switch (sc)
 	{
 	case SCENE_MAIN:
@@ -120,8 +120,6 @@ void LoadHelpScene()
 	ls = CreateLogicSprite(NULL, LSUDecorate, 750, 130, 100, 100, RenderWithRotation, g_img_prismTank, g_img_prismTankMsk);
 	AddElement(g_logicSpriteManager_, ls);
 	ls = CreateLogicSprite(NULL, LSUDecorate, 750, 140, 100, 100, RenderWithRotation, g_img_prismTank, g_img_prismTankMsk);
-	AddElement(g_logicSpriteManager_, ls);
-	ls = CreateLogicSprite(NULL, NULL, 100, 100, 20, 20, RenderWithMask, &g_img_smallBullet, &g_img_smallBulletMsk);
 	AddElement(g_logicSpriteManager_, ls);
 
 	ls = CreateLogicSprite(NULL, NULL, 400, 640, 105, 50, RenderSimple, &g_img_back);
@@ -216,6 +214,16 @@ void LoadWaveChooseScene() {
 	AddElement(g_logicSpriteManager_, ls);
 }
 
+void RenderScore(LogicSprite * ls)
+{
+	tr.left = ls->m_x_;
+	tr.top = ls->m_y_;
+	tr.right = ls->m_x_ + ls->m_w_;
+	tr.bottom = ls->m_y_ + ls->m_h_;
+
+	_stprintf(tstr, _T("%d"), m_score_);
+	drawtext(tstr, &tr, DT_SINGLELINE);
+}
 void LoadGameOverScene()
 {
 	LogicSprite * ls;
@@ -226,10 +234,25 @@ void LoadGameOverScene()
 	ls = CreateLogicSprite(NULL, NULL, 0, 0, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderSimple, &g_img_gameOver);
 	AddElement(g_logicSpriteManager_, ls);
 
+	ls = CreateLogicSprite(NULL, NULL, 180, 440, 100, 30, RenderScore, NULL);
+	AddElement(g_logicSpriteManager_, ls);
+	ls = CreateLogicSprite(NULL, NULL, 140, 520, 105, 50, RenderSimple, &g_img_save);
+	AddElement(g_logicSpriteManager_, ls);
+	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_save, NULL, &g_img_saveFocus);
+	AddButton(b);
 	ls = CreateLogicSprite(NULL, NULL, 820, 680, 105, 50, RenderSimple, &g_img_back);
 	AddElement(g_logicSpriteManager_, ls);
 	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_back, NULL, &g_img_backFocus);
 	AddButton(b);
+}
+
+void LoadStageClearScene() {
+	LogicSprite * ls;
+	Button * b;
+
+	AddElement(g_logicStepManager_, g_stepCheckFocus_);
+
+
 }
 
 void ButtonClickExit(Button* tis) {

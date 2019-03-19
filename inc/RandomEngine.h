@@ -1,6 +1,7 @@
 #pragma once
 
 #define V6_RAND_MAX		1023
+#define V6_RAND_MAX_F	1023.0
 
 // 初始化随机数生成器。
 void InitializeRandomEngine();

@@ -16,7 +16,7 @@ typedef struct _TankData {
 	// 射击间隔/毫秒。
 	int m_shootInterval_;
 	// 子弹速度。
-	int m_bulletSpeed_;
+	double m_bulletSpeed_;
 	int m_atk_;
 	// 秒速度。
 	double m_speed_;

@@ -14,6 +14,7 @@ void LoadDirections(IMAGE* imr) {
 
 void LoadResources()
 {
+	LoadLogicSpriteStepResource();
 	LoadLogicControlStepResource();
 	LoadSceneStepResource();
 	LoadGameStepResource();
@@ -101,6 +102,9 @@ void LoadImages() {
 	LoadDirections(g_img_quickTankMsk);
 	loadimage(&g_img_console, _T("assets\\console.png"));
 	loadimage(&g_img_gameOver, _T("assets\\gameOver.png"));
+	loadimage(&g_img_wailingWall1, _T("assets\\wailingwall1.png"));
+	loadimage(&g_img_wailingWall2, _T("assets\\wailingwall2.png"));
+
 }
 
 IMAGE g_img_bigTank;
@@ -169,3 +173,5 @@ IMAGE g_img_quickTank[4];
 IMAGE g_img_quickTankMsk[4];
 IMAGE g_img_console; 
 IMAGE g_img_gameOver;
+IMAGE g_img_wailingWall1;
+IMAGE g_img_wailingWall2;
