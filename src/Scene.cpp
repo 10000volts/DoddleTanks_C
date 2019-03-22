@@ -1,7 +1,10 @@
 #include "Scene.h"
+#include "InputEngine.h"
 #include "LogicControl.h"
+#include "RenderEngine.h"
 #include "ResourceManager.h"
 #include "Game.h"
+#include "GameConsole.h"
 
 static void LoadMainScene();
 static void LoadHelpScene();
@@ -68,6 +71,7 @@ void LoadMainScene()
 	Button * b;
 
 	AddElement(g_logicStepManager_, g_stepCheckFocus_);
+	AddElement(g_logicStepManager_, g_stepCheckActiveEasyMode_);
 
 	ls = CreateLogicSprite(NULL, NULL, 0, 0, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderSimple, &g_img_mainTitle);
 	AddElement(g_logicSpriteManager_, ls);
@@ -98,7 +102,7 @@ void LoadMainScene()
 
 // LogicSpriteUpdate
 void LSUDecorate(int t, LogicSprite* tis) {
-	tis->m_angle_ += 5.0 * t / 1000;
+	tis->m_angle_ += 5.0 * double(t) / 1000.0;
 	if (tis->m_angle_ >= 2 * V6_PI) tis->m_angle_ -= 2 * V6_PI;
 }
 void LoadHelpScene()
@@ -306,9 +310,9 @@ void ButtonClickExtremelyEasy(Button * tis)
 
 static void StepWaveChange(int t, LogicStep* tis) {
 	if (g_keyboardState_.left_up) {
-		if(twave > 1) --twave;
+		if (twave > 1) --twave; else twave = V6_GAME_MAX_WAVE;
 	}
 	if (g_keyboardState_.right_up) {
-		if (twave < V6_GAME_MAX_WAVE) ++twave;
+		if (twave < V6_GAME_MAX_WAVE) ++twave; else twave = 1;
 	}
 }

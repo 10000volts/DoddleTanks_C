@@ -1,10 +1,6 @@
 #pragma once
 
-#include "Game.h"
 #include "Bullet.h"
-#include "DataModels.h"
-
-#define V6_TANK_HALF_EDGE_LENGTH		40
 
 typedef struct _Tank {
 	// ¾ö²ß¡£

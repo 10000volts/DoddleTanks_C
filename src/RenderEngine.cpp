@@ -1,4 +1,6 @@
+#include <easyx.h>
 #include "LogicControl.h"
+#include "RenderEngine.h"
 
 void InitializeRenderEnv()
 {
@@ -45,6 +47,10 @@ void RenderUpdate()
 	cleardevice();
 	for (i = 0; i < g_logicSpriteManager_->m_count_; ++i) {
 		tls = (LogicSprite *)g_logicSpriteManager_->m_me_[i];
+		tls->m_body_->Render(tls);
+	}
+	for (i = 0; i < g_topLogicSpriteManager_->m_count_; ++i) {
+		tls = (LogicSprite *)g_topLogicSpriteManager_->m_me_[i];
 		tls->m_body_->Render(tls);
 	}
 	EndBatchDraw();

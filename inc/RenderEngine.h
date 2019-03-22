@@ -2,8 +2,7 @@
 
 #include <easyx.h>
 
-struct _LogicSprite;
-typedef _LogicSprite LogicSprite;
+typedef struct _LogicSprite LogicSprite;
 
 typedef struct _RenderSprite {
 	// 不能作任何修改。

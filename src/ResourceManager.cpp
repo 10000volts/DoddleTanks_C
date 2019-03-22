@@ -2,6 +2,7 @@
 #include "LogicControl.h"
 #include "Scene.h"
 #include "Game.h"
+#include "GameConsole.h"
 
 void LoadImages();
 
@@ -18,6 +19,7 @@ void LoadResources()
 	LoadLogicControlStepResource();
 	LoadSceneStepResource();
 	LoadGameStepResource();
+	LoadGameConsoleStepResource();
 	LoadImages();
 }
 
@@ -104,7 +106,7 @@ void LoadImages() {
 	loadimage(&g_img_gameOver, _T("assets\\gameOver.png"));
 	loadimage(&g_img_wailingWall1, _T("assets\\wailingwall1.png"));
 	loadimage(&g_img_wailingWall2, _T("assets\\wailingwall2.png"));
-
+	loadimage(&g_img_gamebg, _T("assets\\gamebg.png"));
 }
 
 IMAGE g_img_bigTank;
@@ -175,3 +177,4 @@ IMAGE g_img_console;
 IMAGE g_img_gameOver;
 IMAGE g_img_wailingWall1;
 IMAGE g_img_wailingWall2;
+IMAGE g_img_gamebg;

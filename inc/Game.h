@@ -1,19 +1,10 @@
 #pragma once
 
-#include "LogicControl.h"
 #include "Item.h"
+#include "Tank.h"
 
-#define V6_GAMEOVER_SUCCESS		1
-#define V6_GAMEFIELD_LEFT		0.0
-#define V6_GAMEFIELD_TOP		0.0
-#define V6_GAMEFIELD_WIDTH		723.0
-#define V6_GAMEFIELD_HEIGHT		768.0
-// 敌方坦克的生成间隔。
-#define V6_GAME_GENERATE_CD		1000
-// 触发器无限次触发的常数。
-#define V6_TRIGGER_INFINITE		-1
-
-typedef struct _Tank Tank;
+typedef struct _LogicStep LogicStep;
+typedef struct _Container Container;
 
 typedef enum _GAME_DIFFICULTY {
 	GDFT_EASY, GDFT_VEASY, GDFT_EEASY
@@ -23,7 +14,7 @@ void LoadGameStepResource();
 
 void InitializeGame();
 // 从文件加载游戏。
-void LoadGameFromFile(LPCSTR file);
+void LoadGameFromFile(const char file[]);
 
 // 游戏主循环。
 extern LogicStep* g_stepGameUpdate_;
@@ -35,11 +26,19 @@ void GenerateItem(int x, int y, ITEMSTYLE is);
 // 返回是否对其到了其他障碍上。(意味着移动失败)
 void AlignToBarriers(Tank* t, double xnew, double ynew);
 
+// 延迟t毫秒后发生。不会因为炫彩特效而自卑。
+void Delay(int t, void(*act)());
+// 延迟t毫秒后发生。不会因为炫彩特效而自卑。
+void DelayWithTwoArgs(int t, void(*act)(int, int), int exd1, int exd2);
+
 extern GAME_DIFFICULTY g_gameDifficulty_;
 // 游戏是否完成。
 extern BOOLean m_success_;
 // 游戏是否失败。
-extern BOOLean m_falied_;
+extern BOOLean m_failed_;
+
+extern TankData m_tankData_[V6_TANKSTYLE_COUNT];
+
 // 当前回合是否为特殊回合，若是，则不自动生成敌方坦克且不会判定默认的回合结束。
 extern BOOLean m_special_wave_;
 // 当前特殊回合是否结束。

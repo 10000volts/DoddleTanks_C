@@ -2,9 +2,10 @@
 
 #include <string.h>
 #include "stdafx.h"
-#include "InputEngine.h"
-#include "RenderEngine.h"
 #include "Container.h"
+
+typedef struct _RenderSprite RenderSprite;
+class IMAGE;
 
 typedef struct _LogicSprite {
 	// 返回此逻辑精灵的真正实体。
@@ -42,6 +43,7 @@ extern BOOLean g_stepInvalid_;
 
 // 全部逻辑精灵的集合。
 extern Container* g_logicSpriteManager_;
+extern Container* g_topLogicSpriteManager_;
 // 全部逻辑步骤的集合。
 extern Container* g_logicStepManager_;
 

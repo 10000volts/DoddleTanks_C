@@ -1,5 +1,7 @@
 #include "Item.h"
 #include "LogicEngine.h"
+#include "RenderEngine.h"
+#include "ResourceManager.h"
 #include "Tank.h"
 
 static void ItemHeartGot(Tank* t);

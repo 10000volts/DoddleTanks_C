@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "LogicControl.h"
+#include "RenderEngine.h"
 #include "MemoryManager.h"
+#include "InputEngine.h"
 
 static void StepCheckSpriteValid(int t, LogicStep* ls);
 
@@ -22,6 +24,10 @@ void LogicUpdate(int t)
 		tlsp = (LogicSprite*)g_logicSpriteManager_->m_me_[i];
 		if(tlsp->Update != NULL) tlsp->Update(t, tlsp);
 	}
+	for (i = 0; i < g_topLogicSpriteManager_->m_count_; ++i) {
+		tlsp = (LogicSprite*)g_topLogicSpriteManager_->m_me_[i];
+		if (tlsp->Update != NULL) tlsp->Update(t, tlsp);
+	}
 }
 
 // ÒÆ³ýËùÓÐÂß¼­²½ÖèºÍÂß¼­¾«Áé¡£
@@ -33,7 +39,12 @@ void UnloadLogicEngine()
 		ls = (LogicSprite*)g_logicSpriteManager_->m_me_[i];
 		free(ls->m_body_);
 	}
+	for (i = 0; i < g_topLogicSpriteManager_->m_count_; ++i) {
+		ls = (LogicSprite*)g_topLogicSpriteManager_->m_me_[i];
+		free(ls->m_body_);
+	}
 	ClearContainer(g_logicSpriteManager_);
+	ClearContainer(g_topLogicSpriteManager_);
 	ClearContainer(g_logicStepManager_);
 }
 
@@ -68,6 +79,8 @@ void LoadLogicSpriteStepResource(){
 BOOLean g_stepInvalid_;
 
 Container* g_logicSpriteManager_ = CreateContainer(sizeof(LogicSprite), TRUE);
+Container* g_topLogicSpriteManager_ = CreateContainer(sizeof(LogicSprite), TRUE);
+
 static inline void LogicStepRemoved() {
 	g_stepInvalid_ = TRUE;
 }

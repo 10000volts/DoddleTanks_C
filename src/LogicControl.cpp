@@ -1,4 +1,6 @@
 #include "LogicControl.h"
+#include "RenderEngine.h"
+#include "InputEngine.h"
 #include "MemoryManager.h"
 #include "Utility.h"
 
@@ -87,4 +89,13 @@ void StepCheckFocus(int t, LogicStep* tis) {
 		if (g_focusButton_->OnLeave != NULL) g_focusButton_->OnLeave(g_focusButton_);
 	}
 	g_focusButton_ = NULL;
+}
+
+void ButtonFocusDefault(Button* tis) {
+	tis->ls_->m_body_->m_image_ = tis->m_body_->m_fcs_image_;
+	tis->ls_->m_body_->m_mask_ = tis->m_body_->m_fcs_mask_;
+}
+void ButtonLeaveDefault(Button* tis) {
+	tis->ls_->m_body_->m_image_ = tis->m_body_->m_def_image_;
+	tis->ls_->m_body_->m_mask_ = tis->m_body_->m_def_mask_;
 }

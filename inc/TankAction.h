@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game.h"
+typedef struct _Tank Tank;
 
 // 混沌宇宙无穷熵增乱七八糟毫无章法令人窒息式走位。
 void TankJunkAI(Tank* t);
@@ -10,6 +10,8 @@ void TankFiveAI(Tank* t);
 void TankQuickAI(Tank* t);
 // 环绕式走位。
 void TankPrismAI(Tank* t);
+// 刺客式混沌宇宙无穷熵增乱七八糟毫无章法令人窒息式走位。
+void TankLanlingkingAI(Tank* t);
 // 锁定式走位。
 void TankAttackAI(Tank* t);
 
@@ -20,4 +22,5 @@ void TankFiveAct(int t, Tank* tis);
 void TankQuickAct(int t, Tank* tis);
 void TankSunAct(int t, Tank* tis);
 void TankLanlingkingAct(int t, Tank* tis);
+void TankAttackAct(int t, Tank* tis);
 void NormalMoveAct(int t, Tank* tis);

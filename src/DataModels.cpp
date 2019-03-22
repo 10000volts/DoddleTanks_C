@@ -26,45 +26,48 @@ static void FillTankDatum(TankData* td, int HPmax, int shootInterval, double bul
 }
 
 static void FillTankData() {
-	FillTankDatum(&g_strongholdData_, 1, 0, 0, 0, 0, 0);
-	FillTankDatum(&g_playerTankData_, 1000, 300, 800, 100, 400, 0);
-	FillTankDatum(&g_wallData_, 2400, 0, 0, 0, 0, 1);
+	int i;
+	for (i = 0; i < V6_DIFFICULTY_COUNT; ++i) {
+		FillTankDatum(&g_tankData_[i][TANK_STRONGHOLD], 1, 0, 0, 0, 0, 0);
+		FillTankDatum(&g_tankData_[i][TANK_PLAYER], 1000, 300, 800, 100, 400, 0);
+		FillTankDatum(&g_tankData_[i][TANK_WALL], 2400, 0, 0, 0, 0, 1);
+	}
 
-	FillTankDatum(&g_junkTankData_[0], 100, 1500, 500, 50, 200, 100);
-	FillTankDatum(&g_junkTankData_[1], 300, 1000, 550, 80, 250, 150);
-	FillTankDatum(&g_junkTankData_[2], 300, 400, 640, 100, 300, 200);
+	FillTankDatum(&g_tankData_[0][TANK_JUNK], 100, 1500, 500, 50, 200, 100);
+	FillTankDatum(&g_tankData_[1][TANK_JUNK], 300, 1000, 550, 80, 250, 150);
+	FillTankDatum(&g_tankData_[2][TANK_JUNK], 300, 400, 640, 100, 300, 200);
 
-	FillTankDatum(&g_bigTankData_[0], 600, 1500, 200, 100, 100, 200);
-	FillTankDatum(&g_bigTankData_[1], 750, 1200, 280, 125, 120, 300);
-	FillTankDatum(&g_bigTankData_[2], 900, 1000, 320, 150, 150, 400);
+	FillTankDatum(&g_tankData_[0][TANK_BIG], 600, 1500, 200, 100, 100, 200);
+	FillTankDatum(&g_tankData_[1][TANK_BIG], 750, 1200, 280, 125, 120, 300);
+	FillTankDatum(&g_tankData_[2][TANK_BIG], 900, 1000, 320, 150, 150, 400);
 
-	FillTankDatum(&g_prismTankData_[0], 400, 800, 280, 70, 350, 300);
-	FillTankDatum(&g_prismTankData_[1], 500, 800, 300, 90, 400, 450);
-	FillTankDatum(&g_prismTankData_[2], 700, 700, 350, 110, 520, 600);
+	FillTankDatum(&g_tankData_[0][TANK_PRISM], 400, 800, 280, 70, 350, 300);
+	FillTankDatum(&g_tankData_[1][TANK_PRISM], 500, 800, 300, 90, 400, 450);
+	FillTankDatum(&g_tankData_[2][TANK_PRISM], 700, 700, 350, 110, 520, 600);
 
-	FillTankDatum(&g_fiveTankData_[0], 800, 1400, 400, 70, 180, 480, 0.2);
-	FillTankDatum(&g_fiveTankData_[1], 1000, 1200, 450, 90, 220, 720, 0.2);
-	FillTankDatum(&g_fiveTankData_[2], 1200, 1000, 500, 100, 250, 960, 0.15);
+	FillTankDatum(&g_tankData_[0][TANK_FIVE], 800, 1400, 400, 70, 180, 480, 0.2);
+	FillTankDatum(&g_tankData_[1][TANK_FIVE], 1000, 1200, 450, 90, 220, 720, 0.2);
+	FillTankDatum(&g_tankData_[2][TANK_FIVE], 1200, 1000, 500, 100, 250, 960, 0.15);
 
-	FillTankDatum(&g_quickTankData_[0], 600, 700, 70, 70, 400, 400, 1.0, 50);
-	FillTankDatum(&g_quickTankData_[1], 800, 400, 70, 90, 450, 600, 1.0, 50);
-	FillTankDatum(&g_quickTankData_[2], 1000, 350, 70, 100, 520, 800, 1.0, 50);
+	FillTankDatum(&g_tankData_[0][TANK_QUICK], 600, 700, 70, 70, 400, 400, 1.0, 50);
+	FillTankDatum(&g_tankData_[1][TANK_QUICK], 800, 400, 70, 90, 450, 600, 1.0, 50);
+	FillTankDatum(&g_tankData_[2][TANK_QUICK], 1000, 350, 70, 100, 520, 800, 1.0, 50);
 
-	FillTankDatum(&g_lanlingkingTankData_[0], 500, 2000, 450, 60, 200, 300);
-	FillTankDatum(&g_lanlingkingTankData_[1], 600, 1800, 500, 80, 250, 450);
-	FillTankDatum(&g_lanlingkingTankData_[2], 650, 1500, 550, 100, 300, 600);
+	FillTankDatum(&g_tankData_[0][TANK_LANLINGKING], 500, 2000, 450, 60, 200, 300);
+	FillTankDatum(&g_tankData_[1][TANK_LANLINGKING], 600, 1800, 500, 80, 250, 450);
+	FillTankDatum(&g_tankData_[2][TANK_LANLINGKING], 650, 1500, 550, 100, 300, 600);
 
-	FillTankDatum(&g_attackTankData_[0], 800, 1800, 100, 100, 100, 400);
-	FillTankDatum(&g_attackTankData_[1], 1000, 1400, 110, 120, 100, 600);
-	FillTankDatum(&g_attackTankData_[2], 1300, 1200, 120, 130, 120, 800);
+	FillTankDatum(&g_tankData_[0][TANK_ATTACK], 800, 1800, 100, 100, 100, 400);
+	FillTankDatum(&g_tankData_[1][TANK_ATTACK], 1000, 1400, 110, 120, 100, 600);
+	FillTankDatum(&g_tankData_[2][TANK_ATTACK], 1300, 1200, 120, 130, 120, 800);
 
-	FillTankDatum(&g_sunTankData_[0], 1000, 3000, 180, 110, 200, 480);
-	FillTankDatum(&g_sunTankData_[1], 1250, 2500, 200, 140, 200, 720);
-	FillTankDatum(&g_sunTankData_[2], 1500, 2000, 250, 160, 200, 960);
+	FillTankDatum(&g_tankData_[0][TANK_SUN], 1000, 3000, 180, 110, 200, 480);
+	FillTankDatum(&g_tankData_[1][TANK_SUN], 1250, 2500, 200, 140, 200, 720);
+	FillTankDatum(&g_tankData_[2][TANK_SUN], 1500, 2000, 250, 160, 200, 960);
 
-	FillTankDatum(&g_bossTankData_[0], 60000, 0, 0, 60, 150, 50000, 0.25, 0);
-	FillTankDatum(&g_bossTankData_[1], 80000, 0, 0, 70, 150, 100000, 0.25, 1);
-	FillTankDatum(&g_bossTankData_[2], 100000, 0, 0, 80, 150, 150000, 0.25, 2);
+	FillTankDatum(&g_tankData_[0][TANK_BOSS], 70000, 0, 0, 60, 150, 50000, 0.25, 0);
+	FillTankDatum(&g_tankData_[1][TANK_BOSS], 80000, 0, 0, 70, 150, 100000, 0.25, 1);
+	FillTankDatum(&g_tankData_[2][TANK_BOSS], 100000, 0, 0, 80, 150, 150000, 0.25, 2);
 }
 
 static void FillWaveDatum(TankWave * tw, int wdata[V6_TANKSTYLE_COUNT]) {
@@ -543,18 +546,7 @@ void FillData()
 	FillWaveData();
 }
 
-TankData g_strongholdData_;
-TankData g_playerTankData_;
-TankData g_wallData_;
-TankData g_junkTankData_[V6_DIFFICULTY_COUNT];
-TankData g_bigTankData_[V6_DIFFICULTY_COUNT];
-TankData g_prismTankData_[V6_DIFFICULTY_COUNT];
-TankData g_fiveTankData_[V6_DIFFICULTY_COUNT];
-TankData g_quickTankData_[V6_DIFFICULTY_COUNT];
-TankData g_lanlingkingTankData_[V6_DIFFICULTY_COUNT];
-TankData g_attackTankData_[V6_DIFFICULTY_COUNT];
-TankData g_sunTankData_[V6_DIFFICULTY_COUNT];
-TankData g_bossTankData_[V6_DIFFICULTY_COUNT];
+TankData g_tankData_[V6_DIFFICULTY_COUNT][V6_TANKSTYLE_COUNT];
 
 TankWave g_waveData_[V6_DIFFICULTY_COUNT][V6_GAME_MAX_WAVE + 1];
 

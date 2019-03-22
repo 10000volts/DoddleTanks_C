@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game.h"
+#include "TankAction.h"
 
 void BossCome();
 

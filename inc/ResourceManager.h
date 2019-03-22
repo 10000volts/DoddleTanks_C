@@ -74,3 +74,6 @@ extern IMAGE g_img_quickTank[4];
 extern IMAGE g_img_quickTankMsk[4];
 extern IMAGE g_img_console;
 extern IMAGE g_img_gameOver;
+extern IMAGE g_img_wailingWall1;
+extern IMAGE g_img_wailingWall2;
+extern IMAGE g_img_gamebg;

@@ -2,6 +2,8 @@
 
 #include "LogicEngine.h"
 
+typedef struct _RenderButton RenderButton;
+
 typedef struct _Button {
 	LogicSprite* ls_;
 	void(*OnClick)(struct _Button* _this);
@@ -32,11 +34,5 @@ extern int buttonReserve_;
 // LogicStep×ÊÔ´¡£
 extern LogicStep* g_stepCheckFocus_;
 
-inline void ButtonFocusDefault(Button* tis) {
-	tis->ls_->m_body_->m_image_ = tis->m_body_->m_fcs_image_;
-	tis->ls_->m_body_->m_mask_ = tis->m_body_->m_fcs_mask_;
-}
-inline void ButtonLeaveDefault(Button* tis) {
-	tis->ls_->m_body_->m_image_ = tis->m_body_->m_def_image_;
-	tis->ls_->m_body_->m_mask_ = tis->m_body_->m_def_mask_;
-}
+void ButtonFocusDefault(Button* tis);
+void ButtonLeaveDefault(Button* tis);

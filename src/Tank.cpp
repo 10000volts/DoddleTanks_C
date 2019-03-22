@@ -1,7 +1,10 @@
 #include "Tank.h"
+#include "Game.h"
 #include "TankAction.h"
 #include "BossTankAction.h"
+#include "LogicEngine.h"
 #include "RandomEngine.h"
+#include "ResourceManager.h"
 
 Tank* CreateTank(TANKSTYLE tankstyle, void * me, LogicSprite * super, TankData td, 
 	int bcl, int bct, int bcw, int bch,
@@ -46,14 +49,14 @@ BOOLean TryShoot(Tank * t)
 
 Tank * CreateStronghold(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_STRONGHOLD, NULL, ls, g_strongholdData_,
+	Tank* t = CreateTank(TANK_STRONGHOLD, NULL, ls, m_tankData_[TANK_STRONGHOLD],
 		7, 25, 45, 38, 7, 25, 45, 38,
 		0.0);
 	return t;
 }
 
 Tank* CreatePlayerTank(LogicSprite* ls) {
-	Tank* t = CreateTank(TANK_PLAYER, NULL, ls, g_playerTankData_,
+	Tank* t = CreateTank(TANK_PLAYER, NULL, ls, m_tankData_[TANK_PLAYER],
 		36, 36, 10, 10, 16, 18, 50, 44,
 		V6_DRT_UP);
 	t->m_noOrientation_ = TRUE;
@@ -66,7 +69,7 @@ Tank* CreatePlayerTank(LogicSprite* ls) {
 
 Tank * CreateJunkTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_JUNK, NULL, ls, g_junkTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_JUNK, NULL, ls, m_tankData_[TANK_JUNK],
 		22, 18, 41, 41, 15, 13, 55, 56,
 		0.0);
 	t->Decide = TankJunkAI;
@@ -76,7 +79,7 @@ Tank * CreateJunkTank(LogicSprite * ls)
 }
 Tank * CreateBigTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_BIG, NULL, ls, g_bigTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_BIG, NULL, ls, m_tankData_[TANK_BIG],
 		11, 14, 57, 56, 11, 14, 57, 56,
 		0.0);
 	t->Decide = TankJunkAI;
@@ -87,7 +90,7 @@ Tank * CreateBigTank(LogicSprite * ls)
 
 Tank * CreatePrismTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_PRISM, NULL, ls, g_prismTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_PRISM, NULL, ls, m_tankData_[TANK_PRISM],
 		23, 23, 33, 33, 9, 9, 63, 63,
 		0.0);
 	t->Decide = TankPrismAI;
@@ -99,7 +102,7 @@ Tank * CreatePrismTank(LogicSprite * ls)
 
 Tank * CreateFiveTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_FIVE, NULL, ls, g_fiveTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_FIVE, NULL, ls, m_tankData_[TANK_FIVE],
 		9, 10, 35, 53, 4, 6, 69, 66,
 		0.0);
 	t->Decide = TankFiveAI;
@@ -110,7 +113,7 @@ Tank * CreateFiveTank(LogicSprite * ls)
 
 Tank * CreateQuickTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_QUICK, NULL, ls, g_quickTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_QUICK, NULL, ls, m_tankData_[TANK_QUICK],
 		10, 35, 61, 15, 10, 29, 61, 27,
 		0.0);
 	t->Decide = TankJunkAI;
@@ -121,7 +124,7 @@ Tank * CreateQuickTank(LogicSprite * ls)
 
 Tank * CreateSunTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_JUNK, NULL, ls, g_sunTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_SUN, NULL, ls, m_tankData_[TANK_SUN],
 		18, 18, 40, 42, 10, 9, 59, 59,
 		0.0);
 	t->Decide = TankFiveAI;
@@ -133,7 +136,7 @@ Tank * CreateSunTank(LogicSprite * ls)
 
 Tank * CreateLanlingkingTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_JUNK, NULL, ls, g_lanlingkingTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_LANLINGKING, NULL, ls, m_tankData_[TANK_LANLINGKING],
 		23, 23, 33, 33, 9, 9, 63, 63,
 		0.0);
 	t->Decide = TankLanlingkingAI;
@@ -147,7 +150,7 @@ Tank * CreateLanlingkingTank(LogicSprite * ls)
 
 Tank * CreateAttackTank(LogicSprite * ls)
 {
-	Tank* t = CreateTank(TANK_ATTACK, NULL, ls, g_attackTankData_[g_gameDifficulty_],
+	Tank* t = CreateTank(TANK_ATTACK, NULL, ls, m_tankData_[TANK_ATTACK],
 		19, 30, 43, 18, 15, 19, 49, 36,
 		0.0);
 	t->Decide = TankAttackAI;

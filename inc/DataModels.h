@@ -31,18 +31,7 @@ typedef struct _TankData {
 // 野割方象。
 void FillData();
 
-extern TankData g_strongholdData_;
-extern TankData g_playerTankData_;
-extern TankData g_wallData_;
-extern TankData g_junkTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_bigTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_prismTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_fiveTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_quickTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_lanlingkingTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_attackTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_sunTankData_[V6_DIFFICULTY_COUNT];
-extern TankData g_bossTankData_[V6_DIFFICULTY_COUNT];
+extern TankData g_tankData_[V6_DIFFICULTY_COUNT][V6_TANKSTYLE_COUNT];
 
 typedef struct _TankWave {
 	void (*OnStart)();
