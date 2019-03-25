@@ -207,7 +207,7 @@ void InitializeGameField() {
 	AddElement(g_topLogicSpriteManager_, ls);
 	ls = CreateLogicSprite(t, NULL, 870, 260, 100, 30, RenderWaveNum, NULL);
 	AddElement(g_topLogicSpriteManager_, ls);
-	ls = CreateLogicSprite(t, NULL, 870, 310, 100, 30, RenderTimeLeft, NULL);
+	ls = CreateLogicSprite(t, NULL, 870, 317, 100, 30, RenderTimeLeft, NULL);
 	AddElement(g_topLogicSpriteManager_, ls);
 }
 static void InitGameGUI() {
@@ -243,7 +243,7 @@ void GameOver(BOOLean success)
 		LoadScene(SCENE_GAMEOVER);
 	}
 	else {
-		
+		LoadScene(SCENE_STAGECLEAR);
 	}
 }
 
@@ -843,11 +843,11 @@ void Delay(int t, void(*act)()) {
 	AddElement(m_triggerList_, tr);
 }
 static void TriggerActDelayWithTwoArgs(Trigger* tis, int t) {
-	((void(*)(int, int))(tis->m_binging_obj_))(tis->m_exdata1_, tis->m_exdata2_);
+	((void(*)(int, int))(tis->m_binging_obj_))(tis->m_exdata3_, tis->m_exdata4_);
 }
 void DelayWithTwoArgs(int t, void(*act)(int, int), int exd1, int exd2)
 {
-	Trigger* tr = CreateTrigger(TriggerCheckDelay, TriggerActDelay, 1, act, exd1, exd2);
+	Trigger* tr = CreateTrigger(TriggerCheckDelay, TriggerActDelayWithTwoArgs, 1, act, t, 0, exd1, exd2);
 	AddElement(m_triggerList_, tr);
 }
 

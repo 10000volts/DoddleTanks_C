@@ -15,6 +15,7 @@ typedef struct _Trigger {
 	double m_exdata3_;
 	double m_exdata4_;
 	double m_exdata5_;
+	void* m_exobj_;
 	BOOLean m_valid_;
 } Trigger;
 

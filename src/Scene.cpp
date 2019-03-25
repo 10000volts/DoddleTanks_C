@@ -5,6 +5,8 @@
 #include "ResourceManager.h"
 #include "Game.h"
 #include "GameConsole.h"
+#include "RankingList.h"
+#include <string.h>
 
 static void LoadMainScene();
 static void LoadHelpScene();
@@ -14,6 +16,7 @@ static void LoadDifficultyChooseScene();
 static void LoadWaveChooseScene();
 static void LoadGameOverScene();
 static void LoadStageClearScene();
+static void LoadSaveScoreScene();
 static void ButtonClickLoadMain(Button* tis);
 static void ButtonClickExit(Button* tis);
 static void ButtonClickLoadGame(Button* tis);
@@ -24,9 +27,14 @@ static void ButtonClickLoadFile(Button* tis);
 static void ButtonClickEasy(Button* tis);
 static void ButtonClickVeryEasy(Button* tis);
 static void ButtonClickExtremelyEasy(Button* tis);
+static void ButtonClickSaveScore(Button* tis);
 static void StepWaveChange(int t, LogicStep* tis);
+static void StepNameInput(int t, LogicStep* tis);
+static void StepChangePage(int t, LogicStep* tis);
 
-LogicStep* g_stepWaveChange_;
+static LogicStep* l_stepWaveChange_;
+static LogicStep* l_stepNameInput_;
+static LogicStep* l_stepChangePage_;
 
 // 清除当前场景上的所有内容并重新加载场景。
 void LoadScene(Scene sc) {
@@ -55,18 +63,24 @@ void LoadScene(Scene sc) {
 	case SCENE_GAMEOVER:
 		LoadGameOverScene();
 		break;
+	case SCENE_STAGECLEAR:
+		LoadStageClearScene();
+		break;
+	case SCENE_SAVESCORE:
+		LoadSaveScoreScene();
+		break;
 	default:
 		break;
 	}
 }
 
-void LoadSceneStepResource()
-{
-	g_stepWaveChange_ = CreateLogicStep((char*)"WaveChange", StepWaveChange);
+void LoadSceneStepResource(){
+	l_stepWaveChange_ = CreateLogicStep((char*)"WaveChange", StepWaveChange);
+	l_stepNameInput_ = CreateLogicStep((char*)"NameInput", StepNameInput);
+	l_stepChangePage_ = CreateLogicStep((char*)"ChangePage", StepChangePage);
 }
 
-void LoadMainScene()
-{
+void LoadMainScene(){
 	LogicSprite * ls;
 	Button * b;
 
@@ -96,8 +110,11 @@ void LoadMainScene()
 	b = CreateButton(ls, ButtonClickExit, ButtonFocusDefault, ButtonLeaveDefault, &g_img_exit, NULL, &g_img_exitFocus);
 	AddButton(b);
 
-	ls = CreateLogicSprite(NULL, NULL, 350, 70, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderWithMask, &g_img_bossTank, &g_img_bossTankMsk);
-	AddElement(g_logicSpriteManager_, ls);
+	ReadHighScore();
+	if (g_top_scores_[0].score >= 250000) {
+		ls = CreateLogicSprite(NULL, NULL, 350, 70, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderWithMask, &g_img_bossTank, &g_img_bossTankMsk);
+		AddElement(g_logicSpriteManager_, ls);
+	}
 }
 
 // LogicSpriteUpdate
@@ -105,8 +122,7 @@ void LSUDecorate(int t, LogicSprite* tis) {
 	tis->m_angle_ += 5.0 * double(t) / 1000.0;
 	if (tis->m_angle_ >= 2 * V6_PI) tis->m_angle_ -= 2 * V6_PI;
 }
-void LoadHelpScene()
-{
+void LoadHelpScene(){
 	LogicSprite * ls;
 	Button * b;
 
@@ -132,13 +148,105 @@ void LoadHelpScene()
 	AddButton(b);
 }
 
-void LoadRankingScene()
-{
-	
+static LogicSprite* l_ranking_list_;
+static void RenderRankingPage2(LogicSprite* ls) {
+	int i;
+	RECT tr, tr2;
+	TCHAR str[V6_NAME_MAX_LENGTH];
+
+	tr.left = ls->m_x_;
+	tr.top = ls->m_y_;
+	tr.right = ls->m_x_ + ls->m_w_;
+	tr.bottom = ls->m_y_ + ls->m_h_;
+	tr2 = tr;
+	tr2.left += 300;
+
+	for (i = V6_MAX_TOP_SCORES / 2; i < V6_MAX_TOP_SCORES; ++i) {
+		wcscpy(str, g_top_scores_[i].name);
+		if (wcscmp(str, _T("")) != 0) {
+			TCHAR tstr[128];
+			memset(tstr, 0, sizeof(tstr));
+			settextcolor(BLUE);
+			_stprintf(tstr, _T("%s"), str);
+			drawtext(tstr, &tr, DT_SINGLELINE);
+
+			memset(tstr, 0, sizeof(tstr));
+			settextcolor(BLACK);
+			_stprintf(tstr, _T("%d"), g_top_scores_[i].score);
+			drawtext(tstr, &tr2, DT_SINGLELINE);
+
+			tr.top += 50;
+			tr2.top += 50;
+		}
+		else {
+			break;
+		}
+	}
+}
+static void RenderRankingPage1(LogicSprite* ls) {
+	int i;
+	RECT tr, tr2;
+	TCHAR str[V6_NAME_MAX_LENGTH];
+
+	tr.left = ls->m_x_;
+	tr.top = ls->m_y_;
+	tr.right = ls->m_x_ + ls->m_w_;
+	tr.bottom = ls->m_y_ + ls->m_h_;
+	tr2 = tr;
+	tr2.left += 300;
+
+	for (i = 0; i < V6_MAX_TOP_SCORES / 2; ++i) {
+		wcscpy(str, g_top_scores_[i].name);
+		if (wcscmp(str, _T("")) != 0) {
+			TCHAR tstr[128];
+			memset(tstr, 0, sizeof(tstr));
+			_stprintf(tstr, _T("%s"), str);
+			settextcolor(BLUE);
+			drawtext(tstr, &tr, DT_SINGLELINE);
+
+			memset(tstr, 0, sizeof(tstr));
+			settextcolor(BLACK);
+			_stprintf(tstr, _T("%d"), g_top_scores_[i].score);
+			drawtext(tstr, &tr2, DT_SINGLELINE);
+
+			tr.top += 50;
+			tr2.top += 50;
+		}
+		else {
+			break;
+		}
+	}
+}
+void StepChangePage(int t, LogicStep* tis) {
+	if (g_keyboardState_.left_up) {
+		l_ranking_list_->m_body_->Render = RenderRankingPage1;
+	}
+	else if (g_keyboardState_.right_up) {
+		l_ranking_list_->m_body_->Render = RenderRankingPage2;
+	}
+}
+void LoadRankingScene(){
+	LogicSprite * ls;
+	Button * b;
+
+	AddElement(g_logicStepManager_, g_stepCheckFocus_);
+	AddElement(g_logicStepManager_, l_stepChangePage_);
+
+	ls = CreateLogicSprite(NULL, NULL, 0, 0, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderSimple, &g_img_mainTitle2);
+	AddElement(g_logicSpriteManager_, ls);
+
+	ls = CreateLogicSprite(NULL, NULL, 400, 640, 105, 50, RenderSimple, &g_img_back);
+	AddElement(g_logicSpriteManager_, ls);
+	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_back, NULL, &g_img_backFocus);
+	AddButton(b);
+
+	ReadHighScore();
+
+	l_ranking_list_ = CreateLogicSprite(NULL, NULL, 300, 50, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderRankingPage1, NULL);
+	AddElement(g_logicSpriteManager_, l_ranking_list_);
 }
 
-void LoadGameScene()
-{
+void LoadGameScene(){
 	InitializeGame();
 }
 
@@ -197,7 +305,7 @@ void LoadWaveChooseScene() {
 	Button * b;
 
 	AddElement(g_logicStepManager_, g_stepCheckFocus_);
-	AddElement(g_logicStepManager_, g_stepWaveChange_);
+	AddElement(g_logicStepManager_, l_stepWaveChange_);
 
 	twave = 1;
 
@@ -214,12 +322,14 @@ void LoadWaveChooseScene() {
 	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_back, NULL, &g_img_backFocus);
 	AddButton(b);
 
-	ls = CreateLogicSprite(NULL, NULL, 310, 300, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, WaveRender, &g_img_mainTitle2);
+	ls = CreateLogicSprite(NULL, NULL, 310, 300, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, WaveRender, NULL);
 	AddElement(g_logicSpriteManager_, ls);
 }
 
-void RenderScore(LogicSprite * ls)
-{
+void ButtonClickSaveScore(Button * tis){
+	LoadScene(SCENE_SAVESCORE);
+}
+void RenderScore(LogicSprite * ls){
 	tr.left = ls->m_x_;
 	tr.top = ls->m_y_;
 	tr.right = ls->m_x_ + ls->m_w_;
@@ -228,8 +338,7 @@ void RenderScore(LogicSprite * ls)
 	_stprintf(tstr, _T("%d"), m_score_);
 	drawtext(tstr, &tr, DT_SINGLELINE);
 }
-void LoadGameOverScene()
-{
+void LoadGameOverScene(){
 	LogicSprite * ls;
 	Button * b;
 
@@ -242,7 +351,7 @@ void LoadGameOverScene()
 	AddElement(g_logicSpriteManager_, ls);
 	ls = CreateLogicSprite(NULL, NULL, 140, 520, 105, 50, RenderSimple, &g_img_save);
 	AddElement(g_logicSpriteManager_, ls);
-	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_save, NULL, &g_img_saveFocus);
+	b = CreateButton(ls, ButtonClickSaveScore, ButtonFocusDefault, ButtonLeaveDefault, &g_img_save, NULL, &g_img_saveFocus);
 	AddButton(b);
 	ls = CreateLogicSprite(NULL, NULL, 820, 680, 105, 50, RenderSimple, &g_img_back);
 	AddElement(g_logicSpriteManager_, ls);
@@ -256,7 +365,89 @@ void LoadStageClearScene() {
 
 	AddElement(g_logicStepManager_, g_stepCheckFocus_);
 
+	ls = CreateLogicSprite(NULL, NULL, 0, 0, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderSimple, &g_img_gameOver);
+	AddElement(g_logicSpriteManager_, ls);
 
+	ls = CreateLogicSprite(NULL, NULL, 180, 440, 100, 30, RenderScore, NULL);
+	AddElement(g_logicSpriteManager_, ls);
+	ls = CreateLogicSprite(NULL, NULL, 140, 520, 105, 50, RenderSimple, &g_img_save);
+	AddElement(g_logicSpriteManager_, ls);
+	b = CreateButton(ls, ButtonClickSaveScore, ButtonFocusDefault, ButtonLeaveDefault, &g_img_save, NULL, &g_img_saveFocus);
+	AddButton(b);
+	ls = CreateLogicSprite(NULL, NULL, 820, 680, 105, 50, RenderSimple, &g_img_back);
+	AddElement(g_logicSpriteManager_, ls);
+	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_back, NULL, &g_img_backFocus);
+	AddButton(b);
+}
+
+static TCHAR l_name[V6_NAME_MAX_LENGTH];
+static int l_name_edil_pos;
+static BOOLean l_keyDown[128];
+static void ButtonClickSave(Button* tis) {
+	SaveScore(l_name, m_score_);
+	LoadScene(SCENE_MAIN);
+}
+void RenderName(LogicSprite * ls) {
+	tr.left = ls->m_x_;
+	tr.top = ls->m_y_;
+	tr.right = ls->m_x_ + ls->m_w_;
+	tr.bottom = ls->m_y_ + ls->m_h_;
+
+	_stprintf(tstr, _T("键入您的姓名：%s"), l_name);
+	drawtext(tstr, &tr, DT_SINGLELINE);
+}
+static void StepNameInputUpdateKey(int key) {
+	if (GetAsyncKeyState(key)) {
+		l_keyDown[key] = TRUE;
+	}
+	else {
+		if (l_keyDown[key]) {
+			if (key == VK_BACK) {
+				if (l_name_edil_pos) {
+					l_name[--l_name_edil_pos] = 0;
+				}
+			}
+			else if (l_name_edil_pos < V6_NAME_MAX_LENGTH) {
+				l_name[l_name_edil_pos++] = key;
+			}
+		}
+		l_keyDown[key] = FALSE;
+	}
+}
+void StepNameInput(int t, LogicStep* tis) {
+	int key;
+	for (key = '0'; key <= '9'; ++key) {
+		StepNameInputUpdateKey(key);
+	}
+	for (key = 'A'; key <= 'Z'; ++key) {
+		StepNameInputUpdateKey(key);
+	}
+	StepNameInputUpdateKey(VK_BACK);
+}
+void LoadSaveScoreScene(){
+	LogicSprite * ls;
+	Button * b;
+
+	AddElement(g_logicStepManager_, g_stepCheckFocus_);
+	AddElement(g_logicStepManager_, l_stepNameInput_);
+
+	ls = CreateLogicSprite(NULL, NULL, 0, 0, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderSimple, &g_img_mainTitle2);
+	AddElement(g_logicSpriteManager_, ls);
+
+	ls = CreateLogicSprite(NULL, NULL, 400, 640, 105, 50, RenderSimple, &g_img_back);
+	AddElement(g_logicSpriteManager_, ls);
+	b = CreateButton(ls, ButtonClickLoadMain, ButtonFocusDefault, ButtonLeaveDefault, &g_img_back, NULL, &g_img_backFocus);
+	AddButton(b);
+
+	ls = CreateLogicSprite(NULL, NULL, 200, 300, 105, 50, RenderSimple, &g_img_save);
+	AddElement(g_logicSpriteManager_, ls);
+	b = CreateButton(ls, ButtonClickSave, ButtonFocusDefault, ButtonLeaveDefault, &g_img_save, NULL, &g_img_saveFocus);
+	AddButton(b);
+
+	ls = CreateLogicSprite(NULL, NULL, 150, 200, V6_WINDOWWIDTH, V6_WINDOWHEIGHT, RenderName, NULL);
+	AddElement(g_logicSpriteManager_, ls);
+
+	memset(l_keyDown, 0, sizeof(l_keyDown));
 }
 
 void ButtonClickExit(Button* tis) {
@@ -284,26 +475,22 @@ void ButtonClickLoadDifficultyChoose(Button* tis) {
 	LoadScene(SCENE_DIFFICULTY_CHOOSE);
 }
 
-void ButtonClickLoadFile(Button * tis)
-{
+void ButtonClickLoadFile(Button * tis){
 	LoadGameFromFile("save.dat");
 	LoadScene(SCENE_GAME);
 }
 
-void ButtonClickEasy(Button * tis)
-{
+void ButtonClickEasy(Button * tis){
 	g_gameDifficulty_ = GDFT_EASY;
 	LoadScene(SCENE_WAVE_CHOOSE);
 }
 
-void ButtonClickVeryEasy(Button * tis)
-{
+void ButtonClickVeryEasy(Button * tis){
 	g_gameDifficulty_ = GDFT_VEASY;
 	LoadScene(SCENE_WAVE_CHOOSE);
 }
 
-void ButtonClickExtremelyEasy(Button * tis)
-{
+void ButtonClickExtremelyEasy(Button * tis){
 	g_gameDifficulty_ = GDFT_EEASY;
 	LoadScene(SCENE_WAVE_CHOOSE);
 }

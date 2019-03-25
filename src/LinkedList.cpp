@@ -22,7 +22,7 @@ void LinkedListInsertNext(Node * n1, Node * n){
 }
 
 Node* LinkedListDelete(Node * head, Node * n){
-
+	return NULL;
 }
 
 void LinkedListFree(Node * head){

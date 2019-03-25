@@ -5,20 +5,23 @@
 
 void LoadData(void * buf, const char filename[]){
 	FILE* f = fopen(filename, "r");
-	unsigned char str[1024];
-	int i;
-	for (i = 0; !feof(f); ++i) {
-		fread(&str[i], sizeof(unsigned char), 1, f);
+	if (f != NULL) {
+		unsigned char str[2048];
+		memset(str, 0, sizeof(str));
+		int i;
+		for (i = 0; !feof(f); ++i) {
+			fread(&str[i], sizeof(unsigned char), 1, f);
+		}
+		memcpy(buf, str, i - 1);
+		fclose(f);
 	}
-	DecMem(str, i);
-	memcpy(buf, str, i);
 }
 
 void SaveData(void * buf, const char filename[], size_t siz){
 	FILE* f = fopen(filename, "w");
-	void* t;
+	void* t = malloc(siz);
 	memcpy(t, buf, siz);
-	EncMem(buf, siz);
-	fwrite(buf, sizeof(char), siz, f);
+	fwrite(t, sizeof(unsigned char), siz, f);
 	fclose(f);
+	free(t);
 }

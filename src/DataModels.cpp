@@ -186,7 +186,7 @@ static void FillWaveData() {
 	wd[TANK_FIVE] = 4;
 	FillWaveDatum(&g_waveData_[1][7], wd);
 	ClearWD(wd);
-	wd[TANK_JUNK] = 6;
+	wd[TANK_JUNK] = 4;
 	wd[TANK_BIG] = 6;
 	wd[TANK_FIVE] = 4;
 	FillWaveDatum(&g_waveData_[2][7], wd);
@@ -327,12 +327,12 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[0][17], wd);
 	ClearWD(wd);
 	wd[TANK_JUNK] = 6;
-	wd[TANK_PRISM] = 7;
+	wd[TANK_PRISM] = 6;
 	wd[TANK_QUICK] = 6;
 	FillWaveDatum(&g_waveData_[1][17], wd);
 	ClearWD(wd);
 	wd[TANK_JUNK] = 6;
-	wd[TANK_PRISM] = 8;
+	wd[TANK_PRISM] = 7;
 	wd[TANK_QUICK] = 6;
 	FillWaveDatum(&g_waveData_[2][17], wd);
 
@@ -368,7 +368,7 @@ static void FillWaveData() {
 	ClearWD(wd);
 	wd[TANK_JUNK] = 4;
 	wd[TANK_QUICK] = 4;
-	wd[TANK_FIVE] = 5;
+	wd[TANK_FIVE] = 4;
 	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[2][19], wd);
 	g_waveData_[2][19].OnClear = GenerateItemHeartAndGWC4;
@@ -401,18 +401,18 @@ static void FillWaveData() {
 	FillWaveDatum(&g_waveData_[2][21], wd);
 
 	ClearWD(wd);
-	wd[TANK_QUICK] = 4;
-	wd[TANK_SUN] = 6;
+	wd[TANK_QUICK] = 2;
+	wd[TANK_SUN] = 7;
 	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[0][22], wd);
 	ClearWD(wd);
-	wd[TANK_QUICK] = 4;
-	wd[TANK_SUN] = 6;
+	wd[TANK_QUICK] = 2;
+	wd[TANK_SUN] = 7;
 	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[1][22], wd);
 	ClearWD(wd);
-	wd[TANK_QUICK] = 4;
-	wd[TANK_SUN] = 6;
+	wd[TANK_QUICK] = 2;
+	wd[TANK_SUN] = 7;
 	wd[TANK_ATTACK] = 4;
 	FillWaveDatum(&g_waveData_[2][22], wd);
 

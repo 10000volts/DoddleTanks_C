@@ -368,9 +368,9 @@ void TankPrismAct(int t, Tank * tis)
 			sa += V6_PI * 2 / 3;
 		}
 		tis->m_shootCD_ += tis->m_data_.m_shootInterval_;
-		tis->m_shoot_angle_ += 20.0 * double(t) / 1000.0;
-		tis->m_shoot_angle_ = ConvertIntoStandard(tis->m_shoot_angle_);
 	}
+	tis->m_shoot_angle_ += 2.0 * double(t) / 1000.0;
+	tis->m_shoot_angle_ = ConvertIntoStandard(tis->m_shoot_angle_);
 }
 
 void TankFiveAct(int t, Tank * tis)
@@ -380,10 +380,11 @@ void TankFiveAct(int t, Tank * tis)
 	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ <= 0) {
 		double sa;
 		int i;
-		int stx = tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
-			sty = tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2;
+		double stx = tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2.0,
+			sty = tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2.0;
 		tis->m_shoot_angle_ = CalAngle(stx, sty, 
-			m_playerTank_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH, m_playerTank_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH);
+			m_playerTank_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2.0,
+									   m_playerTank_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2.0);
 		for (i = -2; i != 3; ++i) {
 			sa = tis->m_shoot_angle_ + (double)i * V6_PI / 9.0;
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(sa);

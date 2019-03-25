@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "DataModels.h"
 #include "RandomEngine.h"
+#include "RankingList.h"
 
 #pragma comment(lib,"winmm.lib")
 
