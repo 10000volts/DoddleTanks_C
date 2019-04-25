@@ -324,7 +324,7 @@ void TankJunkAct(int t, Tank * tis)
 	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ <= 0) {
 		double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
 		double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_);
-		LogicSprite* ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+		LogicSprite* ls = CreateSmallBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 			tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 			tis->m_data_.m_atk_, FALSE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		AddElement(g_logicSpriteManager_, ls);
@@ -341,7 +341,7 @@ void TankBigAct(int t, Tank * tis)
 		double s = tis->m_data_.m_bulletSpeed_ + (double)(NextRand() % 60 - 30);
 		double sx = s * cos(tis->m_shoot_angle_);
 		double sy = -s * sin(tis->m_shoot_angle_);
-		LogicSprite* ls = CreateBigBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
+		LogicSprite* ls = CreateBigBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
 			tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
 			tis->m_data_.m_atk_, FALSE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		AddElement(g_logicSpriteManager_, ls);
@@ -360,7 +360,7 @@ void TankPrismAct(int t, Tank * tis)
 		for (i = 0; i < 3; ++i) {
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(sa);
 			double sy = -tis->m_data_.m_bulletSpeed_ * sin(sa);
-			LogicSprite* ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			LogicSprite* ls = CreateSmallBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				tis->m_data_.m_atk_, TRUE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			AddElement(g_logicSpriteManager_, ls);
@@ -389,7 +389,7 @@ void TankFiveAct(int t, Tank * tis)
 			sa = tis->m_shoot_angle_ + (double)i * V6_PI / 9.0;
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(sa);
 			double sy = -tis->m_data_.m_bulletSpeed_ * sin(sa);
-			LogicSprite* ls = CreateSmallBullet(tis, stx, sty,
+			LogicSprite* ls = CreateSmallBullet(stx, sty,
 				tis->m_data_.m_atk_, FALSE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			AddElement(g_logicSpriteManager_, ls);
 			AddElement(m_enemyBulletList_, ls->m_me_);
@@ -411,12 +411,12 @@ void TankQuickAct(int t, Tank * tis)
 		int big = NextRand() % 5;
 		LogicSprite* ls;
 		if (big == 0) {
-			ls = CreateBigBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
+			ls = CreateBigBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
 				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
 				tis->m_data_.m_atk_, FALSE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		}
 		else {
-			ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ls = CreateSmallBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				tis->m_data_.m_atk_ * 3 / 2, TRUE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		}
@@ -436,7 +436,7 @@ void TankSunAct(int t, Tank * tis)
 		for (i = 0; i < 8; ++i) {
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(sa);
 			double sy = -tis->m_data_.m_bulletSpeed_ * sin(sa);
-			LogicSprite* ls = CreateBigBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
+			LogicSprite* ls = CreateBigBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
 				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_BIGBULLET_EDGE_LENGTH / 2,
 				tis->m_data_.m_atk_, TRUE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			AddElement(g_logicSpriteManager_, ls);
@@ -456,7 +456,7 @@ void TankLanlingkingAct(int t, Tank * tis)
 		if (ex->m_contiousShootCountLeft_) {
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
 			double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_);
-			LogicSprite* ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			LogicSprite* ls = CreateSmallBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				tis->m_data_.m_atk_, TRUE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			AddElement(g_logicSpriteManager_, ls);
@@ -474,7 +474,7 @@ void TankLanlingkingAct(int t, Tank * tis)
 				m_playerTank_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH, m_playerTank_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH);
 			double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
 			double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_);
-			LogicSprite* ls = CreateSmallBullet(tis, stx, sty,
+			LogicSprite* ls = CreateSmallBullet(stx, sty,
 				tis->m_data_.m_atk_, TRUE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			AddElement(g_logicSpriteManager_, ls);
 			AddElement(m_enemyBulletList_, ls->m_me_);
@@ -498,7 +498,7 @@ void TankAttackAct(int t, Tank * tis)
 		tis->m_shoot_angle_ = CalAngle(stx, sty,
 			m_playerTank_->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH, m_playerTank_->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH);
 
-		ls = CreateSmallBullet(tis, stx, sty,
+		ls = CreateSmallBullet(stx, sty,
 			tis->m_data_.m_atk_, FALSE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		AddElement(g_logicSpriteManager_, ls);
 		AddElement(m_enemyBulletList_, ls->m_me_);

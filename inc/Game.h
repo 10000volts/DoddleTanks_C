@@ -12,9 +12,7 @@ typedef enum _GAME_DIFFICULTY {
 
 void LoadGameStepResource();
 
-void InitializeGame();
-// 从文件加载游戏。
-void LoadGameFromFile(const char file[]);
+void InitializeGame(BOOLean loadFromLife);
 
 // 游戏主循环。
 extern LogicStep* g_stepGameUpdate_;

@@ -6,7 +6,7 @@
 void LoadData(void * buf, const char filename[]){
 	FILE* f = fopen(filename, "r");
 	if (f != NULL) {
-		unsigned char str[2048];
+		unsigned char str[200016];
 		memset(str, 0, sizeof(str));
 		int i;
 		for (i = 0; !feof(f); ++i) {

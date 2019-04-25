@@ -4,7 +4,7 @@
 #include "RenderEngine.h"
 #include "ResourceManager.h"
 
-LogicSprite * CreateSmallBullet(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
+LogicSprite * CreateSmallBullet(int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
 	double speedx, double speedy, void(*update)(int t, Bullet *b),
 	double xmin, double ymin, double xmax, double ymax)
 {
@@ -12,7 +12,6 @@ LogicSprite * CreateSmallBullet(Tank* sender, int x, int y, int atk, BOOLean ign
 	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
 	memset(b, 0, sizeof(Bullet));
 
-	b->m_sender_ = sender;
 	b->m_super_ = ls;
 	b->m_bulletStyle_ = SMALL_BULLET;
 	b->m_atk_ = atk;
@@ -30,7 +29,7 @@ LogicSprite * CreateSmallBullet(Tank* sender, int x, int y, int atk, BOOLean ign
 	return ls;
 }
 
-LogicSprite * CreateBigBullet(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
+LogicSprite * CreateBigBullet(int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
 	double speedx, double speedy, void(*update)(int t, Bullet *b),
 	double xmin, double ymin, double xmax, double ymax)
 {
@@ -38,7 +37,6 @@ LogicSprite * CreateBigBullet(Tank* sender, int x, int y, int atk, BOOLean ignor
 	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
 	memset(b, 0, sizeof(Bullet));
 
-	b->m_sender_ = sender;
 	b->m_super_ = ls;
 	b->m_bulletStyle_ = BIG_BULLET;
 	b->m_atk_ = atk;
@@ -56,19 +54,33 @@ LogicSprite * CreateBigBullet(Tank* sender, int x, int y, int atk, BOOLean ignor
 	return ls;
 }
 
-void ShootSmall(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
+LogicSprite * CreateBullet(BULLETSTYLE bs, int x, int y, int atk, 
+						   BOOLean ignore_wall, double damageRatioToBuilding, double speedx, double speedy,
+						   void(*update)(int t, Bullet *b), double xmin, double ymin, double xmax, double ymax) {
+	switch (bs) {
+	case BIG_BULLET:
+		return CreateBigBullet(x, y, atk, ignore_wall, damageRatioToBuilding, speedx, speedy,
+							   update, xmin, ymin, xmax, ymax);
+	case SMALL_BULLET:
+		return CreateSmallBullet(x, y, atk, ignore_wall, damageRatioToBuilding, speedx, speedy,
+								 update, xmin, ymin, xmax, ymax);
+	}
+	return NULL;
+}
+
+void ShootSmall(int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
 	double speedx, double speedy, void(*update)(int t, Bullet* b),
 	double xmin, double ymin, double xmax, double ymax) {
-	LogicSprite* ls = CreateSmallBullet(sender, x, y, atk, ignore_wall, damageRatioToBuilding,
+	LogicSprite* ls = CreateSmallBullet(x, y, atk, ignore_wall, damageRatioToBuilding,
 		speedx, speedy, update, xmin, ymin, xmax, ymax);
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyBulletList_, ls->m_me_);
 }
 
-void ShootBig(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
+void ShootBig(int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
 	double speedx, double speedy, void(*update)(int t, Bullet* b),
 	double xmin, double ymin, double xmax, double ymax) {
-	LogicSprite* ls = CreateBigBullet(sender, x, y, atk, ignore_wall, damageRatioToBuilding,
+	LogicSprite* ls = CreateBigBullet(x, y, atk, ignore_wall, damageRatioToBuilding,
 		speedx, speedy, update, xmin, ymin, xmax, ymax);
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyBulletList_, ls->m_me_);

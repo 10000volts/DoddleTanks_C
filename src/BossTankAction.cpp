@@ -218,7 +218,7 @@ static Tank * CreateBossTank(LogicSprite * ls)
 		ext->m_attack1_interval_ = 1000;
 		ext->m_attack1_bullet_count_ = 4;
 		ext->m_attack1_angacc_ = 2.0;
-		ext->m_attack1_back_angle_speed_ = 0.3;
+		ext->m_attack1_back_angle_speed_ = 0.4;
 		ext->m_attack1_max_angle_speed_ = 2.2;
 
 		ext->m_attack2_interval_ = 60;
@@ -245,7 +245,6 @@ static Tank * CreateBossTank(LogicSprite * ls)
 	ex = ext;
 	bosssuper = boss->m_super_;
 	ex->m_attack3_aim_interval2_ = 50 * 1000 / ext->m_slow2_bullet_speed_;
-
 	return t;
 }
 
@@ -491,7 +490,7 @@ static BOOLean TCBossAttack3ServentAct(Trigger* tis, int t) {
 			double sa = CalAngle(stx, sty, ex->m_attack3_aimx_ - V6_SMALLBULLET_EDGE_LENGTH / 2.0, ex->m_attack3_aimy_ - V6_SMALLBULLET_EDGE_LENGTH / 2.0);
 			tis->m_exdata4_ = v * cos(sa);
 			tis->m_exdata5_ = -v * sin(sa);
-			LogicSprite* b = CreateSmallBullet(boss, stx, sty,
+			LogicSprite* b = CreateSmallBullet(stx, sty,
 											   boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, tis->m_exdata4_, 
 											   tis->m_exdata5_, BossAttack3BulletBounce);
 
@@ -505,7 +504,7 @@ static BOOLean TCBossAttack3ServentAct(Trigger* tis, int t) {
 		else {
 			double stx = svt->m_x_ + (V6_BIGBULLET_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH) / 2.0,
 				sty = svt->m_y_ + (V6_BIGBULLET_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH) / 2.0;
-			LogicSprite* b = CreateSmallBullet(boss, stx, sty,
+			LogicSprite* b = CreateSmallBullet(stx, sty,
 											   boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, tis->m_exdata4_,
 											   tis->m_exdata5_, BossAttack3BulletBounce);
 
@@ -553,7 +552,7 @@ void BossAttack3ShootServent(int x, int y) {
 	double sx = ex->m_mid2_bullet_speed_ * cos(sa);
 	double sy = -ex->m_mid2_bullet_speed_ * sin(sa);
 	double dt = Distance2(double(x) + V6_BIGBULLET_EDGE_LENGTH / 2.0, double(y) + V6_BIGBULLET_EDGE_LENGTH / 2.0, stx, sty);
-	LogicSprite* b = CreateBigBullet(boss, V6_BOSS_SP3ABS_X - V6_BIGBULLET_EDGE_LENGTH / 2.0,
+	LogicSprite* b = CreateBigBullet(V6_BOSS_SP3ABS_X - V6_BIGBULLET_EDGE_LENGTH / 2.0,
 									 V6_BOSS_SP3ABS_Y - V6_BIGBULLET_EDGE_LENGTH / 2.0,
 									 boss->m_data_.m_atk_ * 10, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 	// exdata3 : ¾àÀëÆ½·½
@@ -629,7 +628,7 @@ void BossSelfProtectAttack(int t) {
 			sa += V6_PI / 12.0;
 			double sx = ex->m_fast1_bullet_speed_ * cos(sa);
 			double sy = -ex->m_fast1_bullet_speed_ * sin(sa);
-			ShootSmall(boss, stx, sty,
+			ShootSmall(stx, sty,
 				boss->m_data_.m_atk_, FALSE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		}
 	}
@@ -644,18 +643,18 @@ void BossAttack0(int t) {
 		for (i = 0; i < 3; ++i) {
 			double sx = ex->m_fast1_bullet_speed_ * cos(sa);
 			double sy = -ex->m_fast1_bullet_speed_ * sin(sa);
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
-			ShootSmall(boss, V6_BOSS_SP1ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP1ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP1ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			sx = ex->m_fast1_bullet_speed_ * cos(V6_PI / 2 - sa);
 			sy = -ex->m_fast1_bullet_speed_ * sin(V6_PI / 2 - sa);
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
-			ShootSmall(boss, V6_BOSS_SP2ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP2ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP2ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			sa += V6_PI * 2.0 / 3.0;
@@ -767,7 +766,7 @@ void BossAttack1(int t) {
 				double v = s * 1000.0 / 200.0;
 				double sx = v * cos(boss->m_shoot_angle_);
 				double sy = -v * sin(boss->m_shoot_angle_);
-				LogicSprite* b = CreateBigBullet(boss, V6_BOSS_SP3ABS_X - V6_BIGBULLET_EDGE_LENGTH / 2,
+				LogicSprite* b = CreateBigBullet(V6_BOSS_SP3ABS_X - V6_BIGBULLET_EDGE_LENGTH / 2,
 					V6_BOSS_SP3ABS_Y - V6_BIGBULLET_EDGE_LENGTH / 2,
 					boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate, -1000.0, 0.0, 1000.0, 1000.0);
 				Trigger* tr = CreateTrigger(TCBossAttack1BulletMove1, TABossAttack1BulletMove1, 1, b->m_me_, 0, 0, s);
@@ -796,7 +795,7 @@ void BossAttack2(int t) {
 			double sx = s * cos(sa);
 			double sy = -s * sin(sa);
 			ex->m_attack2_rand_t_ += ex->m_attack2_rand_frequence_;
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		}
@@ -804,14 +803,14 @@ void BossAttack2(int t) {
 			double sa = boss->m_shoot_angle_ - V6_PI / 12.0;
 			double sx = ex->m_mid1_bullet_speed_ * cos(sa);
 			double sy = -ex->m_mid1_bullet_speed_ * sin(sa);
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 
 			sa += V6_PI / 6;
 			sx = ex->m_mid1_bullet_speed_ * cos(sa);
 			sy = -ex->m_mid1_bullet_speed_ * sin(sa);
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			boss->m_shootCD_ += ex->m_attack2_interval_;
@@ -847,7 +846,7 @@ void BossAttack3(int t) {
 				sa = boss->m_shoot_angle_ + (double)i * V6_PI / 5.0;
 				double sx = ex->m_slow2_bullet_speed_ * cos(sa);
 				double sy = -ex->m_slow2_bullet_speed_ * sin(sa);
-				LogicSprite* ls = CreateSmallBullet(boss, stx, sty,
+				LogicSprite* ls = CreateSmallBullet(stx, sty,
 													boss->m_data_.m_atk_, FALSE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BossAttack3BulletBounce);
 				AddElement(g_logicSpriteManager_, ls);
 				AddElement(m_enemyBulletList_, ls->m_me_);
@@ -864,7 +863,7 @@ void BossAttack3(int t) {
 				sa = boss->m_shoot_angle_ + (double)i * V6_PI / 5.0;
 				double sx = ex->m_slow2_bullet_speed_ * cos(sa);
 				double sy = -ex->m_slow2_bullet_speed_ * sin(sa);
-				LogicSprite* ls = CreateSmallBullet(boss, stx, sty,
+				LogicSprite* ls = CreateSmallBullet(stx, sty,
 													boss->m_data_.m_atk_, FALSE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BossAttack3BulletBounce);
 				AddElement(g_logicSpriteManager_, ls);
 				AddElement(m_enemyBulletList_, ls->m_me_);
@@ -889,13 +888,13 @@ void BossAttack4(int t) {
 			double sy = -s * sin(sa);
 			double shx = V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2 + ex->m_attack4_radius_ * cos(ex->m_attack4_angle_);
 			double shy = V6_BOSS_SP3ABS_Y + 120 - V6_SMALLBULLET_EDGE_LENGTH / 2 - ex->m_attack4_radius_ * sin(ex->m_attack4_angle_);
-			ShootSmall(boss, shx, shy,
+			ShootSmall(shx, shy,
 					   boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 
 			sa += V6_PI / 4.0;
 			sx = s * cos(sa);
 			sy = -s * sin(sa);
-			ShootSmall(boss, shx, shy,
+			ShootSmall(shx, shy,
 					   boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 
 			sa += V6_PI;
@@ -903,13 +902,13 @@ void BossAttack4(int t) {
 			sy = -s * sin(sa);
 			shx = V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2 + ex->m_attack4_radius_ * cos(V6_PI + ex->m_attack4_angle_);
 			shy = V6_BOSS_SP3ABS_Y + 120 - V6_SMALLBULLET_EDGE_LENGTH / 2 - ex->m_attack4_radius_ * sin(V6_PI + ex->m_attack4_angle_);
-			ShootSmall(boss, shx, shy,
+			ShootSmall(shx, shy,
 					   boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 
 			sa -= V6_PI / 4.0;
 			sx = s * cos(sa);
 			sy = -s * sin(sa);
-			ShootSmall(boss, shx, shy,
+			ShootSmall(shx, shy,
 					   boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			ex->m_attack4_angle_ += ex->m_attack4_angle_speed_ * (1.0 + (150.0 - ex->m_attack4_radius_) / 150.0) * double(t) / 1000.0;
 			boss->m_shootCD_ += ex->m_attack4_interval_ / (1.0 + (150.0 - ex->m_attack4_radius_) / 150.0);
@@ -958,7 +957,7 @@ void BossAttack5(int t) {
 			double sx = s * cos(sa);
 			double sy = -s * sin(sa);
 			ex->m_attack5_rand_t_ += ex->m_attack5_rand_frequence_;
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		}
@@ -966,14 +965,14 @@ void BossAttack5(int t) {
 			double sa = boss->m_shoot_angle_ - V6_PI / 12.0;
 			double sx = ex->m_fast2_bullet_speed_ * cos(sa);
 			double sy = -ex->m_fast2_bullet_speed_ * sin(sa);
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 
 			sa += V6_PI / 6.0;
 			sx = ex->m_fast2_bullet_speed_ * cos(sa);
 			sy = -ex->m_fast2_bullet_speed_ * sin(sa);
-			ShootSmall(boss, V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
+			ShootSmall(V6_BOSS_SP3ABS_X - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				V6_BOSS_SP3ABS_Y - V6_SMALLBULLET_EDGE_LENGTH / 2,
 				boss->m_data_.m_atk_, TRUE, boss->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 			boss->m_shootCD_ += ex->m_attack5_interval_;

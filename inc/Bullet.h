@@ -1,8 +1,6 @@
 #pragma once
 
 #include "GameBase.h"
-
-typedef struct _Tank Tank;
 typedef struct _LogicSprite LogicSprite;
 
 typedef enum _BULLETSTYLE {
@@ -18,8 +16,6 @@ typedef struct _Bullet{
 	void* m_me_;
 	// 父类指针。
 	LogicSprite* m_super_;
-	// 发射者。
-	Tank* m_sender_;
 
 	// 子弹的攻击力。
 	int m_atk_;
@@ -35,19 +31,23 @@ typedef struct _Bullet{
 	BOOLean m_valid_ = TRUE;
 } Bullet;
 
-LogicSprite* CreateSmallBullet(Tank* sender, int x, int y, int atk, 
+LogicSprite* CreateSmallBullet(int x, int y, int atk, 
 	BOOLean ignore_wall, double damageRatioToBuilding, double speedx, double speedy, void(*update)(int t, Bullet* b),
 	double xmin = 0, double ymin = 0, double xmax = V6_GAMEFIELD_WIDTH, double ymax = V6_GAMEFIELD_HEIGHT);
 
-LogicSprite* CreateBigBullet(Tank* sender, int x, int y, int atk,
+LogicSprite* CreateBigBullet(int x, int y, int atk,
 	BOOLean ignore_wall, double damageRatioToBuilding, double speedx, double speedy, void(*update)(int t, Bullet* b),
 	double xmin = 0, double ymin = 0, double xmax = V6_GAMEFIELD_WIDTH, double ymax = V6_GAMEFIELD_HEIGHT);
 
-void ShootSmall(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
+LogicSprite* CreateBullet(BULLETSTYLE bs, int x, int y, int atk,
+						  BOOLean ignore_wall, double damageRatioToBuilding, double speedx, double speedy, void(*update)(int t, Bullet* b),
+						  double xmin = 0, double ymin = 0, double xmax = V6_GAMEFIELD_WIDTH, double ymax = V6_GAMEFIELD_HEIGHT);
+
+void ShootSmall(int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
 	double speedx, double speedy, void(*update)(int t, Bullet* b),
 	double xmin = 0, double ymin = 0, double xmax = V6_GAMEFIELD_WIDTH, double ymax = V6_GAMEFIELD_HEIGHT);
 
-void ShootBig(Tank* sender, int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
+void ShootBig(int x, int y, int atk, BOOLean ignore_wall, double damageRatioToBuilding,
 	double speedx, double speedy, void(*update)(int t, Bullet* b),
 	double xmin = 0, double ymin = 0, double xmax = V6_GAMEFIELD_WIDTH, double ymax = V6_GAMEFIELD_HEIGHT);
 

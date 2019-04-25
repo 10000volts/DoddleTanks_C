@@ -64,7 +64,7 @@ void LoadScene(Scene sc) {
 		LoadGameOverScene();
 		break;
 	case SCENE_STAGECLEAR:
-		LoadStageClearScene();
+		LoadSaveScoreScene();
 		break;
 	case SCENE_SAVESCORE:
 		LoadSaveScoreScene();
@@ -246,8 +246,9 @@ void LoadRankingScene(){
 	AddElement(g_logicSpriteManager_, l_ranking_list_);
 }
 
+static BOOLean gameLoadFromFile_ = FALSE;
 void LoadGameScene(){
-	InitializeGame();
+	InitializeGame(gameLoadFromFile_);
 }
 
 void LoadDifficultyChooseScene() {
@@ -463,6 +464,7 @@ void ButtonClickLoadHelp(Button* tis) {
 }
 
 void ButtonClickLoadGame(Button* tis) {
+	gameLoadFromFile_ = FALSE;
 	m_wave_ = twave;
 	LoadScene(SCENE_GAME);
 }
@@ -476,7 +478,7 @@ void ButtonClickLoadDifficultyChoose(Button* tis) {
 }
 
 void ButtonClickLoadFile(Button * tis){
-	LoadGameFromFile("save.dat");
+	gameLoadFromFile_ = TRUE;
 	LoadScene(SCENE_GAME);
 }
 

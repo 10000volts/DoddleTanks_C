@@ -9,14 +9,20 @@
 #include "Utility.h"
 #include "Trigger.h"
 #include "GameConsole.h"
+#include "SaveAndLoad.h"
+#include "RankingList.h"
+
+#include <cstdio>
 
 #define V6_GAME_TIME	2700000
 #define V6_ADJUST_TIME	5000
 typedef Tank Respawn;
 
-static BOOLean m_valid_;
+// 从文件加载游戏。
+static void LoadGameFromFile(const char file[]);
 static void InitGameGUI();
-static void InitializeGameField();
+static void InitializePlayer();
+static void LoadMap();
 
 // 游戏是否暂停。
 static BOOLean m_pause_;
@@ -44,33 +50,36 @@ void StepRunTrigger(int t);
 // 清除死亡的坦克和子弹。
 static void StepCheckValid();
 
+// 保存当前游戏进度。
+static void SaveGame();
+
 // 在重生点的位置尝试生成新的敌人。
 static void GenerateNewAt(Respawn* t);
 // 没有作生成合法性判定。
-static void SetWall(int x, int y);
+static Tank* SetWall(int x, int y);
 // 没有作生成合法性判定。
 static void SetIfWall(int x, int y);
 // 没有作生成合法性判定。
 // 设置敌方坦克重生点。
 static void SetAnkhWall(int x, int y);
 // 在指定位置生成指定坦克，没有作生成合法性判定。
-static void SetNewTank(TANKSTYLE ts, int x, int y);
+static Tank* SetNewTank(TANKSTYLE ts, int x, int y);
 // 没有作生成合法性判定。
-static void SetNewJunkTank(int x, int y);
+static Tank* SetNewJunkTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewBigTank(int x, int y);
+static Tank* SetNewBigTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewPrismTank(int x, int y);
+static Tank* SetNewPrismTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewFiveTank(int x, int y);
+static Tank* SetNewFiveTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewQuickTank(int x, int y);
+static Tank* SetNewQuickTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewSunTank(int x, int y);
+static Tank* SetNewSunTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewLanlingkingTank(int x, int y);
+static Tank* SetNewLanlingkingTank(int x, int y);
 // 没有作生成合法性判定。
-static void SetNewAttackTank(int x, int y);
+static Tank* SetNewAttackTank(int x, int y);
 
 // 判断在指定列表内的坦克元素是否与指定矩形有碰撞。若有，返回该坦克。
 static Tank* CheckRectWithTankList(int x, int y, int w, int h, Container* c);
@@ -104,18 +113,21 @@ void LoadGameStepResource() {
 	g_stepGameUpdate_ = CreateLogicStep((char*)"CheckEvent", StepGameUpdate);
 }
 
-void InitializeGame()
+void InitializeGame(BOOLean loadFromLife)
 {
-	if (!m_valid_) {
+	m_success_ = FALSE;
+	m_failed_ = FALSE;
+	if (loadFromLife) {
+		LoadGameFromFile("save.dat");
+	}
+	else {
 		int i;
-		m_success_ = FALSE;
-		m_failed_ = FALSE;
 		--m_wave_;
 		m_special_wave_ = FALSE;
 		m_special_wave_end_ = FALSE;
 		m_adjustTime_ = V6_ADJUST_TIME;
 		m_time_ = V6_GAME_TIME;
-		m_score_ = 0;	
+		m_score_ = 0;
 		m_playingAnimation_ = FALSE;
 		memcpy(m_tankData_, g_tankData_[g_gameDifficulty_], sizeof(TankData) * V6_TANKSTYLE_COUNT);
 		if (g_easyMode_) {
@@ -129,19 +141,22 @@ void InitializeGame()
 			memset(&(m_waveData_[i]), 0, sizeof(TankWave));
 		}
 		InitGameGUI();
-		InitializeGameField();
-		m_valid_ = TRUE;
+		LoadMap();
+		InitializePlayer();
 	}
 
 	AddElement(g_logicStepManager_, g_stepGameUpdate_);
 }
-void LoadMap() {
+static void LoadRespawn() {
 	SetAnkhWall(320, 0);
 	SetAnkhWall(160, 0);
 	SetAnkhWall(480, 0);
 	SetAnkhWall(0, 80);
 	SetAnkhWall(640, 80);
 	if (g_gameDifficulty_ >= GDFT_VEASY) SetAnkhWall(320, 240);
+}
+void LoadMap() {
+	LoadRespawn();
 
 	SetWall(80, 160);
 	SetWall(160, 160);
@@ -172,15 +187,14 @@ void LoadMap() {
 	SetWall(400, 700);
 	SetWall(480, 700);
 }
-void InitializeGameField() {
+// 据点必须是序号为0的中立坦克。
+void InitializePlayer() {
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, 320, 700, 80, 80, RenderSimple, &g_img_castle);
 	AddElement(g_logicSpriteManager_, ls);
 	Tank* t = CreateStronghold(ls);
 	t->Dead = TankDeadFatal;
 	m_stronghold_ = t;
 	AddElement(m_neutralTankList_, t);
-
-	LoadMap();
 
 	ls = CreateLogicSprite(NULL, PlayerTankRotate, 80, 700, 80, 80, RenderWithRotation, &g_img_bigTank, &g_img_bigTankMsk);
 	AddElement(g_logicSpriteManager_, ls);
@@ -225,7 +239,95 @@ static void InitGameGUI() {
 
 void LoadGameFromFile(const char file[])
 {
-	m_valid_ = TRUE;
+	/*
+		存档文件结构：
+		当前波次 最大波次 最大坦克种类(用于保持可扩展性，以适应之后还可能添加的新的坦克/新的波次模式)
+		波次数据
+		当前分数
+		剩余时间
+		剩余的可放置墙数目
+		玩家坦克(HP 位置.xy)
+		据点坦克(HP 位置.xy)
+		敌方坦克数目
+		敌方坦克
+		中立坦克数目
+		中立坦克
+		我方子弹数目
+		我方子弹(子弹种类 位置.xy 速度.xy)
+		敌方子弹数目
+		敌方子弹
+	*/
+
+	int i, j;
+	int n, m;
+	int a, b, c;
+	double d, e, f, g, h;
+	LogicSprite* ls;
+	if (freopen(file, "r", stdin) == NULL) {
+		return;
+	}
+	m_special_wave_ = FALSE;
+	m_special_wave_end_ = FALSE;
+	m_adjustTime_ = 0;
+
+	scanf("%d%d%d", &m_wave_, &n, &m);
+	for (i = 0; i < n; ++i) {
+		for (j = 0; j < m; ++j) {
+			scanf("%d", &m_waveData_[i].m_tank_num_[j]);
+		}
+	}
+
+	scanf("%d", &m_score_);
+	scanf("%d", &m_time_);
+	m_playingAnimation_ = FALSE;
+	scanf("%d", &m);
+
+	memcpy(m_tankData_, g_tankData_[g_gameDifficulty_], sizeof(TankData) * V6_TANKSTYLE_COUNT);
+	if (g_easyMode_) {
+		for (i = 0; i < V6_TANKSTYLE_COUNT; ++i) {
+			m_tankData_[i].m_score_ /= 10;
+		}
+	}
+
+	for (i = 1; i <= m_wave_; ++i) {
+		if (m_waveData_[i].OnStart != NULL) m_waveData_[i].OnStart();
+	}
+
+	InitGameGUI();
+	LoadRespawn();
+	InitializePlayer();
+	
+	scanf("%d%lf%lf", &m_playerTank_->m_HP, &m_playerTank_->m_super_->m_x_, &m_playerTank_->m_super_->m_y_);
+	((PlayerTank*)m_playerTank_->m_extra_)->m_wall_count_ = m;
+	scanf("%d%lf%lf", &m_stronghold_->m_HP, &m_stronghold_->m_super_->m_x_, &m_stronghold_->m_super_->m_y_);
+	
+	scanf("%d", &n);
+	for (i = 0; i < n; ++i) {
+		scanf("%d%d%lf%lf", &a, &b, &e, &f);
+		Tank* t = SetNewTank((TANKSTYLE)a, e, f);
+		t->m_HP = b;
+	}
+	scanf("%d", &n);
+	for (i = 0; i < n; ++i) {
+		scanf("%d%d%lf%lf", &a, &b, &e, &f);
+		Tank* t = SetNewTank((TANKSTYLE)a, e, f);
+		t->m_HP = b;
+	}
+
+	scanf("%d", &n);
+	for (i = 0; i < n; ++i) {
+		scanf("%d%lf%lf%d%d%lf%lf%lf", &a, &e, &f, &b, &c, &d, &g, &h);
+		ls = CreateBullet((BULLETSTYLE)a, e, f, b, c, d, g, h, BulletNormalUpdate);
+		AddElement(g_logicSpriteManager_, ls);
+		AddElement(m_playerBulletList_, ls->m_me_);
+	}
+	scanf("%d", &n);
+	for (i = 0; i < n; ++i) {
+		scanf("%d%lf%lf%d%d%lf%lf%lf", &a, &e, &f, &b, &c, &d, &g, &h);
+		ls = CreateBullet((BULLETSTYLE)a, e, f, b, c, d, g, h, BulletNormalUpdate);
+		AddElement(g_logicSpriteManager_, ls);
+		AddElement(m_enemyBulletList_, ls->m_me_);
+	}
 }
 
 void GameOver(BOOLean success)
@@ -238,7 +340,6 @@ void GameOver(BOOLean success)
 	ClearContainer(m_enemyTankList_);
 	ClearContainer(m_playerBulletList_);
 	ClearContainer(m_playerTankList_);
-	m_valid_ = FALSE;
 	if (!success) {
 		LoadScene(SCENE_GAMEOVER);
 	}
@@ -251,6 +352,7 @@ LogicStep* g_stepGameUpdate_;
 void StepGameUpdate(int t, LogicStep* tis){
 	if (g_keyboardState_.pause_up) {
 		m_pause_ = !m_pause_;
+		SaveGame();
 	}
 	if (!m_pause_) {
 		if (!m_playingAnimation_) {
@@ -523,6 +625,86 @@ void StepCheckValid() {
 	}
 }
 
+void SaveGame() {
+	char s[100008];
+	char ts[100008];
+	memset(s, 0, sizeof(s));
+	memset(ts, 0, sizeof(s));
+	int i, j;
+	Tank* t;
+	Bullet* b;
+	/*
+		存档文件结构：
+		当前波次 最大波次 最大坦克种类(用于保持可扩展性，以适应之后还可能添加的新的坦克/新的波次模式)
+		波次数据
+		当前分数
+		剩余时间
+		剩余的可放置墙数目
+		玩家坦克(HP 位置.xy)
+		据点坦克(HP 位置.xy)
+		敌方坦克数目
+		敌方坦克
+		中立坦克数目
+		中立坦克
+		我方子弹数目
+		我方子弹(子弹种类 位置.xy atk ignoreWall damageToBuilding 速度.xy)
+		敌方子弹数目
+		敌方子弹
+	*/
+	sprintf(s, "%d %d %d\n", m_wave_, V6_GAME_MAX_WAVE, V6_TANKSTYLE_COUNT);
+	for (i = 1; i <= V6_GAME_MAX_WAVE; ++i) {
+		for (j = 0; j < V6_TANKSTYLE_COUNT - 1; ++j) {
+			sprintf(ts, "%d ", m_waveData_[i].m_tank_num_[j]);
+			strcat(s, ts);
+		}
+		sprintf(ts, "%d\n", m_waveData_[i].m_tank_num_[j]);
+		strcat(s, ts);
+	}
+	sprintf(ts, "%d\n%d\n%d\n", m_score_, m_time_, ((PlayerTank*)m_playerTank_->m_extra_)->m_wall_count_);
+	strcat(s, ts);
+
+	sprintf(ts, "%d %lf %lf\n", m_playerTank_->m_HP, m_playerTank_->m_super_->m_x_, m_playerTank_->m_super_->m_y_);
+	strcat(s, ts);
+	sprintf(ts, "%d %lf %lf\n", m_stronghold_->m_HP, m_stronghold_->m_super_->m_x_, m_stronghold_->m_super_->m_y_);
+	strcat(s, ts);
+
+	sprintf(ts, "%d\n", m_enemyTankList_->m_count_);
+	strcat(s, ts);
+	for (i = 0; i < m_enemyTankList_->m_count_; ++i) {
+		t = (Tank*)m_enemyTankList_->m_me_[i];
+		sprintf(ts, "%d %d %lf %lf\n", t->m_tankStyle_, t->m_HP, t->m_super_->m_x_, t->m_super_->m_y_);
+		strcat(s, ts);
+	}
+	// -1: 减去己方据点。
+	sprintf(ts, "%d\n", m_neutralTankList_->m_count_ - 1);
+	strcat(s, ts);
+	for (i = 0; i < m_neutralTankList_->m_count_; ++i) {
+		t = (Tank*)m_neutralTankList_->m_me_[i];
+		if (t != m_stronghold_) {
+			sprintf(ts, "%d %d %lf %lf\n", t->m_tankStyle_, t->m_HP, t->m_super_->m_x_, t->m_super_->m_y_);
+			strcat(s, ts);
+		}
+	}
+	sprintf(ts, "%d\n", m_playerBulletList_->m_count_);
+	strcat(s, ts);
+	for (i = 0; i < m_playerBulletList_->m_count_; ++i) {
+		b = (Bullet*)m_playerBulletList_->m_me_[i];
+		sprintf(ts, "%d %lf %lf %d %d %lf %lf %lf\n", b->m_bulletStyle_, b->m_super_->m_x_, b->m_super_->m_y_,
+				b->m_atk_, b->m_ignore_wall_, b->m_damageRatioToBuilding_, b->m_speedX_, b->m_speedY_);
+		strcat(s, ts);
+	}
+	sprintf(ts, "%d\n", m_enemyBulletList_->m_count_);
+	strcat(s, ts);
+	for (i = 0; i < m_enemyBulletList_->m_count_; ++i) {
+		b = (Bullet*)m_enemyBulletList_->m_me_[i];
+		sprintf(ts, "%d %lf %lf %d %d %lf %lf %lf\n", b->m_bulletStyle_, b->m_super_->m_x_, b->m_super_->m_y_,
+				b->m_atk_, b->m_ignore_wall_, b->m_damageRatioToBuilding_, b->m_speedX_, b->m_speedY_);
+		strcat(s, ts);
+	}
+
+	SaveData(s, "save.dat", (strlen(s) / 16 + 1) * 16 * sizeof(char));
+}
+
 void GenerateNewAt(Respawn * t)
 {
 	int i, j;
@@ -543,7 +725,7 @@ void GenerateNewAt(Respawn * t)
 		}
 	}
 }
-void SetWall(int x, int y)
+Tank* SetWall(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, WallRender, 
 		x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2, RenderSimple, &g_img_wallWorn0);
@@ -552,6 +734,7 @@ void SetWall(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_neutralTankList_, t);
+	return t;
 }
 void SetIfWall(int x, int y)
 {
@@ -566,36 +749,31 @@ void SetAnkhWall(int x, int y)
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_respawn_, t);
 }
-void SetNewTank(TANKSTYLE ts, int x, int y)
+Tank* SetNewTank(TANKSTYLE ts, int x, int y)
 {
 	switch (ts) {
+	case TANK_WALL:
+		return SetWall(x, y);
 	case TANK_JUNK:
-		SetNewJunkTank(x, y);
-		break;
+		return SetNewJunkTank(x, y);
 	case TANK_BIG:
-		SetNewBigTank(x, y);
-		break;
+		return SetNewBigTank(x, y);
 	case TANK_PRISM:
-		SetNewPrismTank(x, y);
-		break;
+		return SetNewPrismTank(x, y);
 	case TANK_FIVE:
-		SetNewFiveTank(x, y);
-		break;
+		return SetNewFiveTank(x, y);
 	case TANK_QUICK:
-		SetNewQuickTank(x, y);
-		break;
+		return SetNewQuickTank(x, y);
 	case TANK_SUN:
-		SetNewSunTank(x, y);
-		break;
+		return SetNewSunTank(x, y);
 	case TANK_LANLINGKING:
-		SetNewLanlingkingTank(x, y);
-		break;
+		return SetNewLanlingkingTank(x, y);
 	case TANK_ATTACK:
-		SetNewAttackTank(x, y);
-		break;
+		return SetNewAttackTank(x, y);
 	}
+	return NULL;
 }
-void SetNewJunkTank(int x, int y)
+Tank* SetNewJunkTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_junkTank, g_img_junkTankMsk);
@@ -603,8 +781,9 @@ void SetNewJunkTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewBigTank(int x, int y)
+Tank* SetNewBigTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_vegetableTank, g_img_vegetableTankMsk);
@@ -612,8 +791,9 @@ void SetNewBigTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewPrismTank(int x, int y)
+Tank* SetNewPrismTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_prismTank, g_img_prismTankMsk);
@@ -622,8 +802,9 @@ void SetNewPrismTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewFiveTank(int x, int y)
+Tank* SetNewFiveTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_fiveTank, g_img_fiveTankMsk);
@@ -631,8 +812,9 @@ void SetNewFiveTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewQuickTank(int x, int y)
+Tank* SetNewQuickTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, RenderWithDirection, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_quickTank, g_img_quickTankMsk);
@@ -640,8 +822,9 @@ void SetNewQuickTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewSunTank(int x, int y)
+Tank* SetNewSunTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, &g_img_sunTank, &g_img_sunTankMsk);
@@ -649,8 +832,9 @@ void SetNewSunTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewLanlingkingTank(int x, int y)
+Tank* SetNewLanlingkingTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_lanlingkingTank, g_img_lanlingkingTankMsk);
@@ -658,8 +842,9 @@ void SetNewLanlingkingTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
-void SetNewAttackTank(int x, int y)
+Tank* SetNewAttackTank(int x, int y)
 {
 	LogicSprite* ls = CreateLogicSprite(NULL, NULL, x, y, V6_TANK_HALF_EDGE_LENGTH * 2, V6_TANK_HALF_EDGE_LENGTH * 2,
 		RenderWithMask, g_img_attackTank, g_img_attackTankMsk);
@@ -667,6 +852,7 @@ void SetNewAttackTank(int x, int y)
 	ls->m_me_ = t;
 	AddElement(g_logicSpriteManager_, ls);
 	AddElement(m_enemyTankList_, t);
+	return t;
 }
 void GenerateItem(int x, int y, ITEMSTYLE is)
 {
@@ -789,7 +975,7 @@ void PlayerShootAct(Tank* tis) {
 	if (tis->m_shoot_ == TRUE & tis->m_shootCD_ <= 0) {
 		double sx = tis->m_data_.m_bulletSpeed_ * cos(tis->m_shoot_angle_);
 		double sy = -tis->m_data_.m_bulletSpeed_ * sin(tis->m_shoot_angle_);
-		LogicSprite* ls = CreateSmallBullet(tis, tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
+		LogicSprite* ls = CreateSmallBullet(tis->m_super_->m_x_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 			tis->m_super_->m_y_ + V6_TANK_HALF_EDGE_LENGTH - V6_SMALLBULLET_EDGE_LENGTH / 2,
 			tis->m_data_.m_atk_, FALSE, tis->m_data_.m_damageRatioToBuilding_, sx, sy, BulletNormalUpdate);
 		AddElement(g_logicSpriteManager_, ls);
@@ -931,7 +1117,7 @@ void RenderHiScore(LogicSprite * ls)
 	tr.right = ls->m_x_ + ls->m_w_;
 	tr.bottom = ls->m_y_ + ls->m_h_;
 
-	_stprintf(tstr, _T("%d"), 0);
+	_stprintf(tstr, _T("%d"), g_top_scores_[0].score);
 	drawtext(tstr, &tr, DT_SINGLELINE);
 }
 void RenderScore(LogicSprite * ls)

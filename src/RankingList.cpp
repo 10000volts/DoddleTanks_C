@@ -1,3 +1,4 @@
+#include <tchar.h>
 #include "RankingList.h"
 #include "SaveAndLoad.h"
 
@@ -9,6 +10,7 @@ void ReadHighScore() {
 
 // 整体数据会向16字节使用'@'对齐，只允许输入'A'~'Z', '0'~'9'。不过V6_MAX_TOP_SCORES本身即为16的倍数所以不用2333
 BOOLean SaveScore(const TCHAR name[], int sc) {
+	if(wcscmp(name, _T(""))) return FALSE;
 	int i;
 	for (i = 0; i < V6_MAX_TOP_SCORES; ++i) {
 		if (wcscmp(g_top_scores_[i].name, name) == 0) {
