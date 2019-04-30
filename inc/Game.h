@@ -21,7 +21,7 @@ void GameOver(BOOLean success = FALSE);
 
 void GenerateItem(int x, int y, ITEMSTYLE is);
 
-// 返回是否对其到了其他障碍上。(意味着移动失败)
+// 返回是否对齐到了其他障碍上。(意味着移动失败)
 void AlignToBarriers(Tank* t, double xnew, double ynew);
 
 // 延迟t毫秒后发生。不会因为炫彩特效而自卑。
@@ -37,7 +37,7 @@ extern BOOLean m_failed_;
 
 extern TankData m_tankData_[V6_TANKSTYLE_COUNT];
 
-// 当前回合是否为特殊回合，若是，则不自动生成敌方坦克且不会判定默认的回合结束。
+// 当前回合是否为特殊回合，若是，则不自动生成敌方坦克且不会判定默认的回合结束，存档也无法生效。
 extern BOOLean m_special_wave_;
 // 当前特殊回合是否结束。
 extern BOOLean m_special_wave_end_;

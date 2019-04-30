@@ -241,21 +241,23 @@ void LoadGameFromFile(const char file[])
 {
 	/*
 		存档文件结构：
-		当前波次 最大波次 最大坦克种类(用于保持可扩展性，以适应之后还可能添加的新的坦克/新的波次模式)
+		当前波次 最大波次 最大坦克种类(用于保持可扩展性，以适应之后还可能添加的新的坦克/新的波次模式) adjustTime
 		波次数据
 		当前分数
 		剩余时间
 		剩余的可放置墙数目
-		玩家坦克(HP 位置.xy)
+		玩家坦克(HP 位置.xy shootCD)
 		据点坦克(HP 位置.xy)
 		敌方坦克数目
-		敌方坦克
+		敌方坦克(HP 位置.xy shootCD)
 		中立坦克数目
-		中立坦克
+		中立坦克(HP 位置.xy shootCD)
 		我方子弹数目
 		我方子弹(子弹种类 位置.xy 速度.xy)
 		敌方子弹数目
 		敌方子弹
+		道具数目
+		道具(种类 位置.xy)
 	*/
 
 	int i, j;
@@ -268,12 +270,14 @@ void LoadGameFromFile(const char file[])
 	}
 	m_special_wave_ = FALSE;
 	m_special_wave_end_ = FALSE;
-	m_adjustTime_ = 0;
 
-	scanf("%d%d%d", &m_wave_, &n, &m);
-	for (i = 0; i < n; ++i) {
+	memcpy(m_waveData_, g_waveData_[g_gameDifficulty_], sizeof(TankWave) * (V6_GAME_MAX_WAVE + 1));
+	scanf("%d%d%d%d", &m_wave_, &n, &m, &m_adjustTime_);
+	for (i = 1; i <= n; ++i) {
+		m_waveData_[i].m_tank_total_count_ = 0;
 		for (j = 0; j < m; ++j) {
 			scanf("%d", &m_waveData_[i].m_tank_num_[j]);
+			m_waveData_[i].m_tank_total_count_ += m_waveData_[i].m_tank_num_[j];
 		}
 	}
 
@@ -292,26 +296,32 @@ void LoadGameFromFile(const char file[])
 	for (i = 1; i <= m_wave_; ++i) {
 		if (m_waveData_[i].OnStart != NULL) m_waveData_[i].OnStart();
 	}
+	if (m_adjustTime_ > 0) {
+		m_waveData_[m_wave_].OnClear = NULL;
+	}
 
 	InitGameGUI();
 	LoadRespawn();
 	InitializePlayer();
 	
-	scanf("%d%lf%lf", &m_playerTank_->m_HP, &m_playerTank_->m_super_->m_x_, &m_playerTank_->m_super_->m_y_);
+	scanf("%d%lf%lf%d", &m_playerTank_->m_HP, &m_playerTank_->m_super_->m_x_, &m_playerTank_->m_super_->m_y_,
+		  &m_playerTank_->m_shootCD_);
 	((PlayerTank*)m_playerTank_->m_extra_)->m_wall_count_ = m;
 	scanf("%d%lf%lf", &m_stronghold_->m_HP, &m_stronghold_->m_super_->m_x_, &m_stronghold_->m_super_->m_y_);
 	
 	scanf("%d", &n);
 	for (i = 0; i < n; ++i) {
-		scanf("%d%d%lf%lf", &a, &b, &e, &f);
+		scanf("%d%d%lf%lf%d", &a, &b, &e, &f, &c);
 		Tank* t = SetNewTank((TANKSTYLE)a, e, f);
 		t->m_HP = b;
+		t->m_shootCD_ = c;
 	}
 	scanf("%d", &n);
 	for (i = 0; i < n; ++i) {
-		scanf("%d%d%lf%lf", &a, &b, &e, &f);
+		scanf("%d%d%lf%lf%d", &a, &b, &e, &f, &c);
 		Tank* t = SetNewTank((TANKSTYLE)a, e, f);
 		t->m_HP = b;
+		t->m_shootCD_ = c;
 	}
 
 	scanf("%d", &n);
@@ -327,6 +337,14 @@ void LoadGameFromFile(const char file[])
 		ls = CreateBullet((BULLETSTYLE)a, e, f, b, c, d, g, h, BulletNormalUpdate);
 		AddElement(g_logicSpriteManager_, ls);
 		AddElement(m_enemyBulletList_, ls->m_me_);
+	}
+	
+	scanf("%d", &n);
+	for (i = 0; i < n; ++i) {
+		scanf("%d%lf%lf", &a, &d, &e);
+		ls = CreateItem(d, e, (ITEMSTYLE)a);
+		AddElement(g_logicSpriteManager_, ls);
+		AddElement(m_playerItemList_, ls->m_me_);
 	}
 }
 
@@ -352,7 +370,8 @@ LogicStep* g_stepGameUpdate_;
 void StepGameUpdate(int t, LogicStep* tis){
 	if (g_keyboardState_.pause_up) {
 		m_pause_ = !m_pause_;
-		SaveGame();
+		if(!m_special_wave_)
+			SaveGame();
 	}
 	if (!m_pause_) {
 		if (!m_playingAnimation_) {
@@ -633,25 +652,28 @@ void SaveGame() {
 	int i, j;
 	Tank* t;
 	Bullet* b;
+	Item* item;
 	/*
 		存档文件结构：
-		当前波次 最大波次 最大坦克种类(用于保持可扩展性，以适应之后还可能添加的新的坦克/新的波次模式)
+		当前波次 最大波次 最大坦克种类(用于保持可扩展性，以适应之后还可能添加的新的坦克/新的波次模式) adjustTime
 		波次数据
 		当前分数
 		剩余时间
 		剩余的可放置墙数目
-		玩家坦克(HP 位置.xy)
+		玩家坦克(HP 位置.xy shootCD)
 		据点坦克(HP 位置.xy)
 		敌方坦克数目
-		敌方坦克
+		敌方坦克(HP 位置.xy shootCD)
 		中立坦克数目
-		中立坦克
+		中立坦克(HP 位置.xy shootCD)
 		我方子弹数目
-		我方子弹(子弹种类 位置.xy atk ignoreWall damageToBuilding 速度.xy)
+		我方子弹(子弹种类 位置.xy 速度.xy)
 		敌方子弹数目
 		敌方子弹
+		道具数目
+		道具(种类 位置.xy)
 	*/
-	sprintf(s, "%d %d %d\n", m_wave_, V6_GAME_MAX_WAVE, V6_TANKSTYLE_COUNT);
+	sprintf(s, "%d %d %d %d\n", m_wave_, V6_GAME_MAX_WAVE, V6_TANKSTYLE_COUNT, m_adjustTime_);
 	for (i = 1; i <= V6_GAME_MAX_WAVE; ++i) {
 		for (j = 0; j < V6_TANKSTYLE_COUNT - 1; ++j) {
 			sprintf(ts, "%d ", m_waveData_[i].m_tank_num_[j]);
@@ -663,7 +685,7 @@ void SaveGame() {
 	sprintf(ts, "%d\n%d\n%d\n", m_score_, m_time_, ((PlayerTank*)m_playerTank_->m_extra_)->m_wall_count_);
 	strcat(s, ts);
 
-	sprintf(ts, "%d %lf %lf\n", m_playerTank_->m_HP, m_playerTank_->m_super_->m_x_, m_playerTank_->m_super_->m_y_);
+	sprintf(ts, "%d %lf %lf %d\n", m_playerTank_->m_HP, m_playerTank_->m_super_->m_x_, m_playerTank_->m_super_->m_y_, m_playerTank_->m_shootCD_);
 	strcat(s, ts);
 	sprintf(ts, "%d %lf %lf\n", m_stronghold_->m_HP, m_stronghold_->m_super_->m_x_, m_stronghold_->m_super_->m_y_);
 	strcat(s, ts);
@@ -672,7 +694,7 @@ void SaveGame() {
 	strcat(s, ts);
 	for (i = 0; i < m_enemyTankList_->m_count_; ++i) {
 		t = (Tank*)m_enemyTankList_->m_me_[i];
-		sprintf(ts, "%d %d %lf %lf\n", t->m_tankStyle_, t->m_HP, t->m_super_->m_x_, t->m_super_->m_y_);
+		sprintf(ts, "%d %d %lf %lf %d\n", t->m_tankStyle_, t->m_HP, t->m_super_->m_x_, t->m_super_->m_y_, t->m_shootCD_);
 		strcat(s, ts);
 	}
 	// -1: 减去己方据点。
@@ -681,7 +703,7 @@ void SaveGame() {
 	for (i = 0; i < m_neutralTankList_->m_count_; ++i) {
 		t = (Tank*)m_neutralTankList_->m_me_[i];
 		if (t != m_stronghold_) {
-			sprintf(ts, "%d %d %lf %lf\n", t->m_tankStyle_, t->m_HP, t->m_super_->m_x_, t->m_super_->m_y_);
+			sprintf(ts, "%d %d %lf %lf %d\n", t->m_tankStyle_, t->m_HP, t->m_super_->m_x_, t->m_super_->m_y_, t->m_shootCD_);
 			strcat(s, ts);
 		}
 	}
@@ -699,6 +721,14 @@ void SaveGame() {
 		b = (Bullet*)m_enemyBulletList_->m_me_[i];
 		sprintf(ts, "%d %lf %lf %d %d %lf %lf %lf\n", b->m_bulletStyle_, b->m_super_->m_x_, b->m_super_->m_y_,
 				b->m_atk_, b->m_ignore_wall_, b->m_damageRatioToBuilding_, b->m_speedX_, b->m_speedY_);
+		strcat(s, ts);
+	}
+
+	sprintf(ts, "%d\n", m_playerItemList_->m_count_);
+	strcat(s, ts);
+	for (i = 0; i < m_playerItemList_->m_count_; ++i) {
+		item = (Item*)m_playerItemList_->m_me_[i];
+		sprintf(ts, "%d %lf %lf\n", item->m_item_style_, item->m_super_->m_x_, item->m_super_->m_y_);
 		strcat(s, ts);
 	}
 
